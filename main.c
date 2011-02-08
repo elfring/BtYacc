@@ -82,7 +82,7 @@ void onintr()
 }
 
 
-void set_signals()
+static void set_signals(void)
 {
 #ifdef SIGINT
     if (signal(SIGINT, SIG_IGN) != SIG_IGN)
@@ -99,7 +99,7 @@ void set_signals()
 }
 
 
-void usage()
+static void usage(void)
 {
     fprintf(stderr, "usage: %s [-dlrtv] [-b file_prefix] [-S skeleton file] "
 		    "filename\n", myname);
@@ -107,7 +107,7 @@ void usage()
 }
 
 
-void getargs(int argc, char **argv)
+static void getargs(int argc, char **argv)
 {
     register int i;
     register char *s;
@@ -347,7 +347,7 @@ void create_file_names()
 }
 
 
-void open_files()
+static void open_files(void)
 {
     create_file_names();
 

@@ -32,26 +32,8 @@ static Yshort *VERTICES;
 static int top;
 
 
-void lalr()
-{
-    tokensetsize = WORDSIZE(ntokens);
 
-    set_state_table();
-    set_accessing_symbol();
-    set_shift_table();
-    set_reduction_table();
-    set_maxrhs();
-    initialize_LA();
-    set_goto_map();
-    initialize_F();
-    build_relations();
-    compute_FOLLOWS();
-    compute_lookaheads();
-}
-
-
-
-void set_state_table()
+static void set_state_table(void)
 {
     register core *sp;
 
@@ -62,7 +44,7 @@ void set_state_table()
 
 
 
-void set_accessing_symbol()
+static void set_accessing_symbol(void)
 {
     register core *sp;
 
@@ -73,7 +55,7 @@ void set_accessing_symbol()
 
 
 
-void set_shift_table()
+static void set_shift_table(void)
 {
     register shifts *sp;
 
@@ -84,7 +66,7 @@ void set_shift_table()
 
 
 
-void set_reduction_table()
+static void set_reduction_table(void)
 {
     register reductions *rp;
 
@@ -95,7 +77,7 @@ void set_reduction_table()
 
 
 
-void set_maxrhs()
+static void set_maxrhs(void)
 {
   register Yshort *itemp;
   register Yshort *item_end;
@@ -123,7 +105,7 @@ void set_maxrhs()
 
 
 
-void initialize_LA()
+static void initialize_LA(void)
 {
   register int i, j, k;
   register reductions *rp;
@@ -160,7 +142,7 @@ void initialize_LA()
 }
 
 
-void set_goto_map()
+static void set_goto_map(void)
 {
   register shifts *sp;
   register int i;
@@ -229,7 +211,7 @@ void set_goto_map()
 
 /*  Map_goto maps a state/symbol pair into its numeric representation.	*/
 
-int map_goto(int state, int symbol)
+static int map_goto(int state, int symbol)
 {
     register int high;
     register int low;
@@ -254,8 +236,88 @@ int map_goto(int state, int symbol)
 }
 
 
+static void traverse(int i)
+{
+  register unsigned *fp1;
+  register unsigned *fp2;
+  register unsigned *fp3;
+  register int j;
+  register Yshort *rp;
 
-void initialize_F()
+  int height;
+  unsigned *base;
+
+  VERTICES[++top] = i;
+  INDEX[i] = height = top;
+
+  base = F + i * tokensetsize;
+  fp3 = base + tokensetsize;
+
+  rp = R[i];
+  if (rp)
+    {
+      while ((j = *rp++) >= 0)
+	{
+	  if (INDEX[j] == 0)
+	    traverse(j);
+
+	  if (INDEX[i] > INDEX[j])
+	    INDEX[i] = INDEX[j];
+
+	  fp1 = base;
+	  fp2 = F + j * tokensetsize;
+
+	  while (fp1 < fp3)
+	    *fp1++ |= *fp2++;
+	}
+    }
+
+  if (INDEX[i] == height)
+    {
+      for (;;)
+	{
+	  j = VERTICES[top--];
+	  INDEX[j] = infinity;
+
+	  if (i == j)
+	    break;
+
+	  fp1 = base;
+	  fp2 = F + j * tokensetsize;
+
+	  while (fp1 < fp3)
+	    *fp2++ = *fp1++;
+	}
+    }
+}
+
+
+static void digraph(Yshort** relation)
+{
+  register int i;
+
+  infinity = ngotos + 2;
+  INDEX = NEW2(ngotos + 1, Yshort);
+  VERTICES = NEW2(ngotos + 1, Yshort);
+  top = 0;
+
+  R = relation;
+
+  for (i = 0; i < ngotos; i++)
+    INDEX[i] = 0;
+
+  for (i = 0; i < ngotos; i++)
+    {
+      if (INDEX[i] == 0 && R[i])
+	traverse(i);
+    }
+
+  FREE(INDEX);
+  FREE(VERTICES);
+}
+
+
+static void initialize_F(void)
 {
   register int i;
   register int j;
@@ -331,8 +393,86 @@ void initialize_F()
 }
 
 
+static void add_lookback_edge(int stateno, int ruleno, int gotono)
+{
+    register int i, k;
+    register int found;
+    register shorts *sp;
 
-void build_relations()
+    i = lookaheads[stateno];
+    k = lookaheads[stateno + 1];
+    found = 0;
+    while (!found && i < k)
+    {
+	if (LAruleno[i] == ruleno)
+	    found = 1;
+	else
+	    ++i;
+    }
+    assert(found);
+
+    sp = NEW(shorts);
+    sp->next = lookback[i];
+    sp->value = gotono;
+    lookback[i] = sp;
+}
+
+
+static Yshort** transpose(Yshort** R, int n)
+{
+  register Yshort **new_R;
+  register Yshort **temp_R;
+  register Yshort *nedges;
+  register Yshort *sp;
+  register int i;
+  register int k;
+
+  nedges = NEW2(n, Yshort);
+
+  for (i = 0; i < n; i++)
+    {
+      sp = R[i];
+      if (sp)
+	{
+	  while (*sp >= 0)
+	    nedges[*sp++]++;
+	}
+    }
+
+  new_R = NEW2(n, Yshort *);
+  temp_R = NEW2(n, Yshort *);
+
+  for (i = 0; i < n; i++)
+    {
+      k = nedges[i];
+      if (k > 0)
+	{
+	  sp = NEW2(k + 1, Yshort);
+	  new_R[i] = sp;
+	  temp_R[i] = sp;
+	  sp[k] = -1;
+	}
+    }
+
+  FREE(nedges);
+
+  for (i = 0; i < n; i++)
+    {
+      sp = R[i];
+      if (sp)
+	{
+	  while (*sp >= 0)
+	    *temp_R[*sp++]++ = i;
+	}
+    }
+
+  FREE(temp_R);
+
+  return (new_R);
+}
+
+
+static void build_relations(void)
 {
   register int i;
   register int j;
@@ -424,94 +564,14 @@ void build_relations()
 }
 
 
-void add_lookback_edge(int stateno, int ruleno, int gotono)
-{
-    register int i, k;
-    register int found;
-    register shorts *sp;
 
-    i = lookaheads[stateno];
-    k = lookaheads[stateno + 1];
-    found = 0;
-    while (!found && i < k)
-    {
-	if (LAruleno[i] == ruleno)
-	    found = 1;
-	else
-	    ++i;
-    }
-    assert(found);
-
-    sp = NEW(shorts);
-    sp->next = lookback[i];
-    sp->value = gotono;
-    lookback[i] = sp;
-}
-
-
-
-Yshort **transpose(Yshort **R, int n)
-{
-  register Yshort **new_R;
-  register Yshort **temp_R;
-  register Yshort *nedges;
-  register Yshort *sp;
-  register int i;
-  register int k;
-
-  nedges = NEW2(n, Yshort);
-
-  for (i = 0; i < n; i++)
-    {
-      sp = R[i];
-      if (sp)
-	{
-	  while (*sp >= 0)
-	    nedges[*sp++]++;
-	}
-    }
-
-  new_R = NEW2(n, Yshort *);
-  temp_R = NEW2(n, Yshort *);
-
-  for (i = 0; i < n; i++)
-    {
-      k = nedges[i];
-      if (k > 0)
-	{
-	  sp = NEW2(k + 1, Yshort);
-	  new_R[i] = sp;
-	  temp_R[i] = sp;
-	  sp[k] = -1;
-	}
-    }
-
-  FREE(nedges);
-
-  for (i = 0; i < n; i++)
-    {
-      sp = R[i];
-      if (sp)
-	{
-	  while (*sp >= 0)
-	    *temp_R[*sp++]++ = i;
-	}
-    }
-
-  FREE(temp_R);
-
-  return (new_R);
-}
-
-
-
-void compute_FOLLOWS()
+static void compute_FOLLOWS(void)
 {
   digraph(includes);
 }
 
 
-void compute_lookaheads()
+static void compute_lookaheads(void)
 {
   register int i, n;
   register unsigned *fp1, *fp2, *fp3;
@@ -545,81 +605,20 @@ void compute_lookaheads()
 }
 
 
-void digraph(Yshort **relation)
+void lalr(void)
 {
-  register int i;
+    tokensetsize = WORDSIZE(ntokens);
 
-  infinity = ngotos + 2;
-  INDEX = NEW2(ngotos + 1, Yshort);
-  VERTICES = NEW2(ngotos + 1, Yshort);
-  top = 0;
-
-  R = relation;
-
-  for (i = 0; i < ngotos; i++)
-    INDEX[i] = 0;
-
-  for (i = 0; i < ngotos; i++)
-    {
-      if (INDEX[i] == 0 && R[i])
-	traverse(i);
-    }
-
-  FREE(INDEX);
-  FREE(VERTICES);
+    set_state_table();
+    set_accessing_symbol();
+    set_shift_table();
+    set_reduction_table();
+    set_maxrhs();
+    initialize_LA();
+    set_goto_map();
+    initialize_F();
+    build_relations();
+    compute_FOLLOWS();
+    compute_lookaheads();
 }
 
-void traverse(int i)
-{
-  register unsigned *fp1;
-  register unsigned *fp2;
-  register unsigned *fp3;
-  register int j;
-  register Yshort *rp;
-
-  int height;
-  unsigned *base;
-
-  VERTICES[++top] = i;
-  INDEX[i] = height = top;
-
-  base = F + i * tokensetsize;
-  fp3 = base + tokensetsize;
-
-  rp = R[i];
-  if (rp)
-    {
-      while ((j = *rp++) >= 0)
-	{
-	  if (INDEX[j] == 0)
-	    traverse(j);
-
-	  if (INDEX[i] > INDEX[j])
-	    INDEX[i] = INDEX[j];
-
-	  fp1 = base;
-	  fp2 = F + j * tokensetsize;
-
-	  while (fp1 < fp3)
-	    *fp1++ |= *fp2++;
-	}
-    }
-
-  if (INDEX[i] == height)
-    {
-      for (;;)
-	{
-	  j = VERTICES[top--];
-	  INDEX[j] = infinity;
-
-	  if (i == j)
-	    break;
-
-	  fp1 = base;
-	  fp2 = F + j * tokensetsize;
-
-	  while (fp1 < fp3)
-	    *fp2++ = *fp1++;
-	}
-    }
-}

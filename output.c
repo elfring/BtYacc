@@ -118,41 +118,7 @@ void output_yydefred()
     fprintf(output_file, "\n};\n");
 }
 
-
-void output_actions()
-{
-    nvectors = 3*nstates + nvars;
-
-    froms = NEW2(nvectors, Yshort *);
-    tos = NEW2(nvectors, Yshort *);
-    tally = NEW2(nvectors, Yshort);
-    width = NEW2(nvectors, Yshort);
-    if (SRtotal+RRtotal)
-	conflicts = NEW2(4*(SRtotal+RRtotal), Yshort);
-    else
-	conflicts = 0;
-    nconflicts = 0;
-
-    token_actions();
-    FREE(lookaheads);
-    FREE(LA);
-    FREE(LAruleno);
-    FREE(accessing_symbol);
-
-    goto_actions();
-    FREE(goto_map + ntokens);
-    FREE(from_state);
-    FREE(to_state);
-
-    sort_actions();
-    pack_table();
-    output_base();
-    output_table();
-    output_check();
-    output_ctable();
-}
-
-int find_conflict_base(int cbase)
+static int find_conflict_base(int cbase)
 {
     int i,j;
 
@@ -165,7 +131,7 @@ int find_conflict_base(int cbase)
     return cbase;
 }
 
-void token_actions()
+static void token_actions(void)
 {
     register int i, j;
     register int shiftcount, reducecount, conflictcount, csym, cbase;
@@ -276,76 +242,7 @@ void token_actions()
     FREE(actionrow);
 }
 
-void goto_actions()
-{
-    register int i, j, k;
-
-    state_count = NEW2(nstates, Yshort);
-
-    k = default_goto(start_symbol + 1);
-    if (!rflag)
-	fprintf(output_file, "static ");
-    fprintf(output_file, "int yydgoto[] = {%40d,", k);
-    save_column(start_symbol + 1, k);
-
-    j = 10;
-    for (i = start_symbol + 2; i < nsyms; i++)
-    {
-	if (j >= 10)
-	{
-	    if (!rflag) ++outline;
-	    putc('\n', output_file);
-	    j = 1;
-	}
-	else
-	    ++j;
-
-	k = default_goto(i);
-	fprintf(output_file, "%5d,", k);
-	save_column(i, k);
-    }
-
-    if (!rflag) outline += 2;
-    fprintf(output_file, "\n};\n");
-    FREE(state_count);
-}
-
-int default_goto(int symbol)
-{
-    register int i;
-    register int m;
-    register int n;
-    register int default_state;
-    register int max;
-
-    m = goto_map[symbol];
-    n = goto_map[symbol + 1];
-
-    if (m == n) return (0);
-
-    for (i = 0; i < nstates; i++)
-	state_count[i] = 0;
-
-    for (i = m; i < n; i++)
-	state_count[to_state[i]]++;
-
-    max = 0;
-    default_state = 0;
-    for (i = 0; i < nstates; i++)
-    {
-	if (state_count[i] > max)
-	{
-	    max = state_count[i];
-	    default_state = i;
-	}
-    }
-
-    return (default_state);
-}
-
-
-
-void save_column(int symbol, int default_state)
+static void save_column(int symbol, int default_state)
 {
     register int i;
     register int m;
@@ -385,42 +282,7 @@ void save_column(int symbol, int default_state)
     width[symno] = sp1[-1] - sp[0] + 1;
 }
 
-void sort_actions()
-{
-  register int i;
-  register int j;
-  register int k;
-  register int t;
-  register int w;
-
-  order = NEW2(nvectors, Yshort);
-  nentries = 0;
-
-  for (i = 0; i < nvectors; i++)
-    {
-      if (tally[i] > 0)
-	{
-	  t = tally[i];
-	  w = width[i];
-	  j = nentries - 1;
-
-	  while (j >= 0 && (width[order[j]] < w))
-	    j--;
-
-	  while (j >= 0 && (width[order[j]] == w) && (tally[order[j]] < t))
-	    j--;
-
-	  for (k = nentries - 1; k > j; k--)
-	    order[k + 1] = order[k];
-
-	  order[j + 1] = i;
-	  nentries++;
-	}
-    }
-}
-
-
-void pack_table()
+static void pack_table(void)
 {
     register int i;
     register int place;
@@ -465,6 +327,140 @@ void pack_table()
     FREE(tally);
     FREE(width);
     FREE(pos);
+}
+
+static int default_goto(int symbol)
+{
+    register int i;
+    register int m;
+    register int n;
+    register int default_state;
+    register int max;
+
+    m = goto_map[symbol];
+    n = goto_map[symbol + 1];
+
+    if (m == n) return (0);
+
+    for (i = 0; i < nstates; i++)
+	state_count[i] = 0;
+
+    for (i = m; i < n; i++)
+	state_count[to_state[i]]++;
+
+    max = 0;
+    default_state = 0;
+    for (i = 0; i < nstates; i++)
+    {
+	if (state_count[i] > max)
+	{
+	    max = state_count[i];
+	    default_state = i;
+	}
+    }
+
+    return (default_state);
+}
+
+static void goto_actions(void)
+{
+    register int i, j, k;
+
+    state_count = NEW2(nstates, Yshort);
+
+    k = default_goto(start_symbol + 1);
+    if (!rflag)
+	fprintf(output_file, "static ");
+    fprintf(output_file, "int yydgoto[] = {%40d,", k);
+    save_column(start_symbol + 1, k);
+
+    j = 10;
+    for (i = start_symbol + 2; i < nsyms; i++)
+    {
+	if (j >= 10)
+	{
+	    if (!rflag) ++outline;
+	    putc('\n', output_file);
+	    j = 1;
+	}
+	else
+	    ++j;
+
+	k = default_goto(i);
+	fprintf(output_file, "%5d,", k);
+	save_column(i, k);
+    }
+
+    if (!rflag) outline += 2;
+    fprintf(output_file, "\n};\n");
+    FREE(state_count);
+}
+
+static void sort_actions(void)
+{
+  register int i;
+  register int j;
+  register int k;
+  register int t;
+  register int w;
+
+  order = NEW2(nvectors, Yshort);
+  nentries = 0;
+
+  for (i = 0; i < nvectors; i++)
+    {
+      if (tally[i] > 0)
+	{
+	  t = tally[i];
+	  w = width[i];
+	  j = nentries - 1;
+
+	  while (j >= 0 && (width[order[j]] < w))
+	    j--;
+
+	  while (j >= 0 && (width[order[j]] == w) && (tally[order[j]] < t))
+	    j--;
+
+	  for (k = nentries - 1; k > j; k--)
+	    order[k + 1] = order[k];
+
+	  order[j + 1] = i;
+	  nentries++;
+	}
+    }
+}
+
+void output_actions()
+{
+    nvectors = 3*nstates + nvars;
+
+    froms = NEW2(nvectors, Yshort *);
+    tos = NEW2(nvectors, Yshort *);
+    tally = NEW2(nvectors, Yshort);
+    width = NEW2(nvectors, Yshort);
+    if (SRtotal+RRtotal)
+	conflicts = NEW2(4*(SRtotal+RRtotal), Yshort);
+    else
+	conflicts = 0;
+    nconflicts = 0;
+
+    token_actions();
+    FREE(lookaheads);
+    FREE(LA);
+    FREE(LAruleno);
+    FREE(accessing_symbol);
+
+    goto_actions();
+    FREE(goto_map + ntokens);
+    FREE(from_state);
+    FREE(to_state);
+
+    sort_actions();
+    pack_table();
+    output_base();
+    output_table();
+    output_check();
+    output_ctable();
 }
 
 
