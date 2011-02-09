@@ -14,12 +14,6 @@ Yshort final_state;
 static int SRcount;
 static int RRcount;
 
-action *parse_actions(int stateno);
-action *get_shifts(int stateno);
-action *add_reductions(int stateno, action *actions);
-action *add_reduce(action *actions, int ruleno, int symbol);
-
-
 void make_parser()
 {
     register int i;
