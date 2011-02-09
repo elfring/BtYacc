@@ -76,27 +76,58 @@ void done(int k)
 }
 
 
-void onintr()
+#ifdef BTYACC_USE_SIGNAL_HANDLING
+sig_atomic_t BtYacc_is_interrupted = 0;
+
+void BtYacc_stop_test(void)
 {
-    done(1);
+    if (BtYacc_is_interrupted)
+    {
+       (void) fprintf(stderr, "BtYacc execution was interrupted.\n");
+       done(BtYacc_is_interrupted);
+    }
 }
 
 
-void set_signals()
+static void on_interruption(int x)
+{
+   BtYacc_is_interrupted = 255;
+   (void) x;
+}
+
+
+static void set_signal_handler(int number)
+{
+    void (*function)(int) = signal(number, SIG_IGN);
+
+    if (function == SIG_ERR)
+    {
+       perror("btyacc: set_signal_handler() failed to query a setting");
+       exit(254);
+    }
+    else
+       if (  (function != SIG_IGN)
+          && (signal(number, &on_interruption) == SIG_ERR) )
+       {
+          perror("btyacc: set_signal_handler() failed to register a new function");
+          exit(253);
+       }
+}
+
+
+static void signal_setup(void)
 {
 #ifdef SIGINT
-    if (signal(SIGINT, SIG_IGN) != SIG_IGN)
-	signal(SIGINT, onintr);
+    set_signal_handler(SIGINT);
 #endif
 #ifdef SIGTERM
-    if (signal(SIGTERM, SIG_IGN) != SIG_IGN)
-	signal(SIGTERM, onintr);
+    set_signal_handler(SIGTERM);
 #endif
 #ifdef SIGHUP
-    if (signal(SIGHUP, SIG_IGN) != SIG_IGN)
-	signal(SIGHUP, onintr);
+    set_signal_handler(SIGHUP);
 #endif
 }
+#endif
 
 
 void usage()
@@ -400,15 +431,26 @@ void open_files()
 
 int main(int argc, char **argv)
 {
-    set_signals();
+#ifdef BTYACC_USE_SIGNAL_HANDLING
+    signal_setup();
+#endif
+
     getargs(argc, argv);
+    BTYACC_INTERRUPTION_CHECK
     open_files();
+    BTYACC_INTERRUPTION_CHECK
     reader();
+    BTYACC_INTERRUPTION_CHECK
     lr0();
+    BTYACC_INTERRUPTION_CHECK
     lalr();
+    BTYACC_INTERRUPTION_CHECK
     make_parser();
+    BTYACC_INTERRUPTION_CHECK
     verbose();
+    BTYACC_INTERRUPTION_CHECK
     output();
+    BTYACC_INTERRUPTION_CHECK
     done(0);
     return 0;
 }
