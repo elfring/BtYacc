@@ -396,7 +396,6 @@ void set_signals(void);
 void usage(void);
 void getargs(int, char **);
 char *allocate(unsigned);
-void create_file_names(void);
 void open_files(void);
 int main(int, char **);
 
