@@ -149,7 +149,7 @@ static void signal_setup(void)
 #endif
 
 
-static void usage(void)
+static SPLINT_NO_RETURN void usage(void)
 {
     BtYacc_logf("usage: %s [-dlrtv] [-b file_prefix] [-S skeleton file] filename\n", myname);
     exit(1);
@@ -517,5 +517,4 @@ int main(int argc, char **argv)
     output();
     BTYACC_INTERRUPTION_CHECK
     done(0);
-    return 0;
 }

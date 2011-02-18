@@ -301,6 +301,29 @@ extern Yshort final_state;
 /* system variable */
 #include <errno.h>
 
+#if defined(__GNUC__)
+#  if defined(__ICC)
+#    define ATTRIBUTE(x)
+#  else
+#    if ((__GNUC__ > 3) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
+#      define ATTRIBUTE(x) __attribute__(x)
+#      define CAN_USE_ATTRIBUTE 1
+#    else
+#      define ATTRIBUTE(x)
+#    endif
+#  endif
+#else
+#  define ATTRIBUTE(x)
+#endif
+
+#define GCC_NO_RETURN ATTRIBUTE((noreturn))
+
+#ifndef S_SPLINT_S
+#  define SPLINT_NO_RETURN
+#else
+#  define SPLINT_NO_RETURN /*@noreturn@*/
+#endif
+
 /* global functions */
 
 /* closure.c */
@@ -309,18 +332,18 @@ void closure(Yshort *, int);
 void finalize_closure(void);
 
 /* error.c */
-void fatal(char const * msg);
-void no_space(void);
-void open_error(char const * filename);
-void unexpected_EOF(void);
+SPLINT_NO_RETURN void fatal(char const * msg) GCC_NO_RETURN;
+SPLINT_NO_RETURN void no_space(void) GCC_NO_RETURN;
+SPLINT_NO_RETURN void open_error(char const * filename) GCC_NO_RETURN;
+SPLINT_NO_RETURN void unexpected_EOF(void) GCC_NO_RETURN;
 void print_pos(char const * st_line, char const * st_cptr);
 void error(int unsigned lineno, char const * line, char const * cptr, char const * msg, ...);
-void syntax_error(int unsigned lineno, char const * line, char const * cptr);
-void unterminated_comment(int unsigned lineno, char const * line, char const * cptr);
-void unterminated_string(int unsigned lineno, char const * line, char const * cptr);
-void unterminated_text(int unsigned lineno, char const * line, char const * cptr);
-void unterminated_union(int unsigned lineno, char const * line, char const * cptr);
-void over_unionized(char const * cptr);
+SPLINT_NO_RETURN void syntax_error(int unsigned lineno, char const * line, char const * cptr) GCC_NO_RETURN;
+SPLINT_NO_RETURN void unterminated_comment(int unsigned lineno, char const * line, char const * cptr) GCC_NO_RETURN;
+SPLINT_NO_RETURN void unterminated_string(int unsigned lineno, char const * line, char const * cptr) GCC_NO_RETURN;
+SPLINT_NO_RETURN void unterminated_text(int unsigned lineno, char const * line, char const * cptr) GCC_NO_RETURN;
+SPLINT_NO_RETURN void unterminated_union(int unsigned lineno, char const * line, char const * cptr) GCC_NO_RETURN;
+SPLINT_NO_RETURN void over_unionized(char const * cptr) GCC_NO_RETURN;
 void illegal_tag(int unsigned lineno, char const * line, char const * cptr);
 void illegal_character(char const * cptr);
 void used_reserved(char const * s);
@@ -358,7 +381,7 @@ void free_nullable(void);
 void lr0(void);
 
 /* main.c */
-void done(int);
+SPLINT_NO_RETURN void done(int) GCC_NO_RETURN;
 
 #if defined(SIGINT) || defined(SIGTERM) || defined(SIGHUP)
 #define BTYACC_USE_SIGNAL_HANDLING
