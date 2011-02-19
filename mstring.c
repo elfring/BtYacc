@@ -56,7 +56,7 @@ struct mstring *msnew(void) {
 
     if (n && (n->base = n->ptr = malloc(START)))
 	n->end = n->base + START;
-    else if (n) {
+    else {
 	free(n);
 	n = 0; }
     return n;

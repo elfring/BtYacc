@@ -384,7 +384,6 @@ static void initialize_F(void)
 
   for (i = 0; i < ngotos; i++)
     {
-      if (reads[i])
 	FREE(reads[i]);
     }
 

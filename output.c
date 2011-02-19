@@ -326,9 +326,7 @@ static void pack_table(void)
 
     for (i = 0; i < nvectors; i++)
     {
-	if (froms[i])
 	    FREE(froms[i]);
-	if (tos[i])
 	    FREE(tos[i]);
     }
 
@@ -805,7 +803,6 @@ void output_ctable()
 
     BtYacc_puts("\n};\n", output_file);
 
-    if (conflicts)
 	FREE(conflicts);
 }
 

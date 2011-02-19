@@ -88,12 +88,12 @@ char *get_line() {
       goto NextLine;
     }
 
-    if (line) FREE(line);
+    FREE(line);
     saw_eof = 1;
     return line = cptr = 0; 
   }
   if (line == 0 || linesize != (LINESIZE + 1)) {
-    if (line) FREE(line);
+    FREE(line);
     linesize = LINESIZE + 1;
     if (!(line = MALLOC(linesize))) no_space(); 
   }
@@ -1706,7 +1706,6 @@ void free_tags()
     if (tag_table == 0) return;
 
     for (i = 0; i < ntags; ++i) {
-	assert(tag_table[i]);
 	FREE(tag_table[i]); }
     FREE(tag_table);
 }
