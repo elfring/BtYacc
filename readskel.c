@@ -5,13 +5,16 @@
 #define	CHUNK	8192
 
 static char	*cp, *cp_end;
-static char	**ap, **ap_end, **ap_start;
+static char const * * ap;
+static char const * * ap_start;
+static char const * * ap_end;
 
-static void add_ptr(char *p)
+static void add_ptr(char const * const p)
 {
     if (ap == ap_end) {
 	int size = CHUNK;
-	char **nap;
+	char const * * nap;
+
 	while ((ap-ap_start) * sizeof(char *) >= size)
 	    size = size * 2;
 	if (!(nap = malloc(size)))
@@ -24,7 +27,7 @@ static void add_ptr(char *p)
     *ap++ = p;
 }
 
-static void add_string(char *s)
+static void add_string(char const * s)
 {
 int	len = strlen(s)+1;
 
@@ -38,7 +41,7 @@ int	len = strlen(s)+1;
     cp += len;
 }
 
-static void add_fmt(char *fmt, ...)
+static void add_fmt(char const * fmt, ...)
 {
 va_list	args;
 char	buf[256];
@@ -49,9 +52,9 @@ char	buf[256];
     add_string(buf);
 }
 
-static char **fin_section(void)
+static char const * const * fin_section(void)
 {
-  char	**rv;
+  char const * const * rv;
 
   add_ptr(0);
   rv = ap_start;
@@ -59,7 +62,7 @@ static char **fin_section(void)
   return rv;
 }
 
-void read_skel(char *name)
+void read_skel(char const * name)
 {
 char	buf[256];
 int	section = -2;

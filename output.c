@@ -772,9 +772,9 @@ void output_ctable()
 }
 
 
-int is_C_identifier(char *name)
+int is_C_identifier(char const * name)
 {
-    register char *s;
+    register char const * s;
     register int c;
 
     s = name;
@@ -1268,9 +1268,9 @@ void free_reductions()
 
 
 
-void write_section(char *section_name)
+void write_section(char const * section_name)
 {
-    char **section;
+    char const * const * section;
     FILE *fp;
     int i;
     struct section *sl;

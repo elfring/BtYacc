@@ -12,9 +12,9 @@ bucket *first_symbol;
 bucket *last_symbol;
 
 
-int hash(char *name)
+int hash(char const * name)
 {
-    register char *s;
+    register char const * s;
     register int c, k;
 
     assert(name && *name);
@@ -27,7 +27,7 @@ int hash(char *name)
 }
 
 
-bucket *make_bucket(char *name)
+bucket* make_bucket(char const * name)
 {
     register bucket *bp;
 
@@ -55,7 +55,7 @@ bucket *make_bucket(char *name)
 }
 
 
-bucket *lookup(char *name)
+bucket* lookup(char const * name)
 {
     register bucket *bp, **bpp;
 
