@@ -1,0 +1,8 @@
+/*
+This is a header file template which will be integrated into the software
+generation process by the corresponding build tool.
+*/
+
+#define BtYacc_VERSION_MAJOR @BtYacc_VERSION_MAJOR@
+#define BtYacc_VERSION_MINOR @BtYacc_VERSION_MINOR@
+#define BtYacc_VERSION_PATCH @BtYacc_VERSION_PATCH@

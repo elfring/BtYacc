@@ -2,6 +2,10 @@
  * routines for printing error messages  
  */
 
+#ifdef BTYACC_BUILD_USE_CONFIGURATION_HEADER
+#include "build.h"   // System settings from the build configuration
+#endif
+
 #include "defs.h"
 #include <stdarg.h>
 

@@ -1,3 +1,7 @@
+#ifdef BTYACC_BUILD_USE_CONFIGURATION_HEADER
+#include "build.h"   // System settings from the build configuration
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
