@@ -195,7 +195,8 @@ static void getargs(int argc, char **argv)
 	    { char **ps;
 	      char *var_name = s + 1;
 	      extern char *defd_vars[];
-	      for(ps=&defd_vars[0]; *ps; ps++) {
+
+	      for (ps = &defd_vars[0]; *ps; ++ps) {
 		if(strcmp(*ps,var_name)==0) {
 		  error(lineno, 0, 0, "Preprocessor variable %s already defined", var_name);
 		}

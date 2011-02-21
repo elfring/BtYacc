@@ -23,7 +23,8 @@ static void print_closure(int n)
   register Yshort *isp;
 
   printf("\n\nn = %d\n\n", n);
-  for (isp = itemset; isp < itemsetend; isp++)
+
+  for (isp = itemset; isp < itemsetend; ++isp)
     printf("   %d\n", *isp);
 }
 
@@ -37,14 +38,14 @@ static void print_EFF(void)
 
     printf("\n\nEpsilon Free Firsts\n");
 
-    for (i = start_symbol; i < nsyms; i++)
+    for (i = start_symbol; i < nsyms; ++i)
     {
 	printf("\n%s", symbol_name[i]);
 	rowp = EFF + ((i - start_symbol) * WORDSIZE(nvars));
 	word = *rowp++;
 
 	mask = 1;
-	for (j = 0; j < nvars; j++)
+	for (j = 0; j < nvars; ++j)
 	{
 	    if (word & mask)
 		printf("  %s", symbol_name[start_symbol + j]);
@@ -70,13 +71,14 @@ static void print_first_derives(void)
 
   printf("\n\n\nFirst Derives\n");
 
-  for (i = start_symbol; i < nsyms; i++)
+  for (i = start_symbol; i < nsyms; ++i)
     {
       printf("\n%s derives\n", symbol_name[i]);
       rp = first_derives + i * WORDSIZE(nrules);
       cword = *rp++;
       mask = 1;
-      for (j = 0; j <= nrules; j++)
+
+      for (j = 0; j <= nrules; ++j)
         {
 	  if (cword & mask)
 	    printf("   %u\n", j);
@@ -109,7 +111,8 @@ static void set_EFF(void)
     EFF = NEW2(nvars * rowsize, unsigned);
 
     row = EFF;
-    for (i = start_symbol; i < nsyms; i++)
+
+    for (i = start_symbol; i < nsyms; ++i)
     {
 	sp = derives[i];
 	for (rule = *sp; rule > 0; rule = *++sp)
@@ -153,12 +156,14 @@ void set_first_derives()
   set_EFF();
 
   rrow = first_derives + ntokens * rulesetsize;
-  for (i = start_symbol; i < nsyms; i++)
+
+  for (i = start_symbol; i < nsyms; ++i)
     {
       vrow = EFF + ((i - ntokens) * varsetsize);
       cword = *vrow++;
       mask = 1;
-      for (j = start_symbol; j < nsyms; j++)
+
+      for (j = start_symbol; j < nsyms; ++j)
 	{
 	  if (cword & mask)
 	    {
@@ -207,7 +212,8 @@ void closure(Yshort* nucleus, int n)
     rulesetsize = WORDSIZE(nrules);
     rsp = ruleset;
     rsend = ruleset + rulesetsize;
-    for (rsp = ruleset; rsp < rsend; rsp++)
+
+    for (rsp = ruleset; rsp < rsend; ++rsp)
 	*rsp = 0;
 
     csend = nucleus + n;

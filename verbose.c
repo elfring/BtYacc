@@ -53,7 +53,7 @@ void verbose()
 
     BtYacc_puts("\f\n");
 
-    for (i = 0; i < nstates; i++)
+    for (i = 0; i < nstates; ++i)
 	print_state(i);
     FREE(null_rules);
 
@@ -95,7 +95,7 @@ void log_conflicts()
 
     BtYacc_puts("\n\n");
 
-    for (i = 0; i < nstates; i++)
+    for (i = 0; i < nstates; ++i)
     {
 	if (SRconflicts[i] || RRconflicts[i])
 	{
@@ -192,7 +192,7 @@ void print_core(int unsigned state)
     statep = state_table[state];
     k = statep->nitems;
 
-    for (i = 0; i < k; i++)
+    for (i = 0; i < k; ++i)
     {
 	sp1 = sp = ritem + statep->items[i];
 
@@ -200,7 +200,7 @@ void print_core(int unsigned state)
 	rule = -(*sp);
 	BtYacc_printf("\t%s : ", symbol_name[rlhs[rule]]);
 
-        for (sp = ritem + rrhs[rule]; sp < sp1; sp++)
+        for (sp = ritem + rrhs[rule]; sp < sp1; ++sp)
 	    BtYacc_printf("%s ", symbol_name[*sp]);
 
 	BtYacc_putc('.');
@@ -208,7 +208,7 @@ void print_core(int unsigned state)
 	while (*sp >= 0)
 	{
 	    BtYacc_printf(" %s", symbol_name[*sp]);
-	    sp++;
+	    ++sp;
 	}
 
 	BtYacc_printf("  (%d)\n", -2 - *sp);

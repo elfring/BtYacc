@@ -53,7 +53,8 @@ void output_rule_data()
 	    symbol_value[start_symbol]);
 
     j = 10;
-    for (i = 3; i < nrules; i++)
+
+    for (i = 3; i < nrules; ++i)
     {
 	if (j >= 10)
 	{
@@ -77,7 +78,8 @@ void output_rule_data()
     BtYacc_printf(output_file, "int yylen[] = {%42d,", 2);
 
     j = 10;
-    for (i = 3; i < nrules; i++)
+
+    for (i = 3; i < nrules; ++i)
     {
 	if (j >= 10)
 	{
@@ -87,7 +89,7 @@ void output_rule_data()
 	    j = 1;
 	}
 	else
-	  j++;
+	  ++j;
 
         BtYacc_printf(output_file, "%5d,", rrhs[i + 1] - rrhs[i] - 1);
     }
@@ -108,7 +110,8 @@ void output_yydefred()
 	    (defred[0] ? defred[0] - 2 : 0));
 
     j = 10;
-    for (i = 1; i < nstates; i++)
+
+    for (i = 1; i < nstates; ++i)
     {
 	if (j < 10)
 	    ++j;
@@ -132,8 +135,8 @@ static int find_conflict_base(int cbase)
 {
     size_t i,j;
 
-    for (i=0; i<cbase; i++) {
-	for (j=0; j+cbase < nconflicts; j++) {
+    for (i = 0; i < cbase; ++i) {
+	for (j = 0; j + cbase < nconflicts; ++j) {
 	    if (conflicts[i+j] != conflicts[cbase+j])
 		break; }
 	if (j+cbase >= nconflicts)
@@ -162,14 +165,15 @@ static void token_actions(void)
 	    cbase = nconflicts;
 	    for (p = parser[i]; p; p = p->next) {
 		if (csym != -1 && csym != p->symbol) {
-		    conflictcount++;
+		    ++conflictcount;
 		    conflicts[nconflicts++] = -1;
 		    j = find_conflict_base(cbase);
 		    actionrow[csym + 2*ntokens] = j + 1;
 		    if (j == cbase) {
 			cbase = nconflicts; }
 		    else {
-			if (conflicts[cbase] == -1) cbase++;
+			if (conflicts[cbase] == -1) ++cbase;
+
 			nconflicts = cbase; }
 		    csym = -1; }
 		if (p->suppressed == 0) {
@@ -187,18 +191,19 @@ static void token_actions(void)
 		    else if (p->action_code == REDUCE &&
 			     p->number != defred[i]) {
 			if (cbase == nconflicts) {
-			    if (cbase) cbase--;
+			    if (cbase) --cbase;
 			    else       conflicts[nconflicts++] = -1; }
 			conflicts[nconflicts++] = p->number - 2; } } }
 	    if (csym != -1) {
-		conflictcount++;
+		++conflictcount;
 		conflicts[nconflicts++] = -1;
 		j = find_conflict_base(cbase);
 		actionrow[csym + 2*ntokens] = j + 1;
 		if (j == cbase) {
 		    cbase = nconflicts; }
 		else {
-		    if (conflicts[cbase] == -1) cbase++;
+		    if (conflicts[cbase] == -1) ++cbase;
+
 		    nconflicts = cbase; } }
 
 	    tally[i] = shiftcount;
@@ -267,7 +272,8 @@ static void save_column(int symbol, int default_state)
     n = goto_map[symbol + 1];
 
     count = 0;
-    for (i = m; i < n; i++)
+
+    for (i = m; i < n; ++i)
     {
 	if (to_state[i] != default_state)
 	    ++count;
@@ -279,7 +285,7 @@ static void save_column(int symbol, int default_state)
     froms[symno] = sp1 = sp = NEW2(count, Yshort);
     tos[symno] = sp2 = NEW2(count, Yshort);
 
-    for (i = m; i < n; i++)
+    for (i = m; i < n; ++i)
     {
 	if (to_state[i] != default_state)
 	{
@@ -308,10 +314,10 @@ static void pack_table(void)
     lowzero = 0;
     high = 0;
 
-    for (i = 0; i < maxtable; i++)
+    for (i = 0; i < maxtable; ++i)
 	check[i] = -1;
 
-    for (i = 0; i < nentries; i++)
+    for (i = 0; i < nentries; ++i)
     {
 	state = matching_vector(i);
 
@@ -324,7 +330,7 @@ static void pack_table(void)
 	base[order[i]] = place;
     }
 
-    for (i = 0; i < nvectors; i++)
+    for (i = 0; i < nvectors; ++i)
     {
 	    FREE(froms[i]);
 	    FREE(tos[i]);
@@ -350,15 +356,16 @@ static int default_goto(int symbol)
 
     if (m == n) return (0);
 
-    for (i = 0; i < nstates; i++)
+    for (i = 0; i < nstates; ++i)
 	state_count[i] = 0;
 
-    for (i = m; i < n; i++)
-	state_count[to_state[i]]++;
+    for (i = m; i < n; ++i)
+	++(state_count[to_state[i]]);
 
     max = 0;
     default_state = 0;
-    for (i = 0; i < nstates; i++)
+
+    for (i = 0; i < nstates; ++i)
     {
 	if (state_count[i] > max)
 	{
@@ -384,7 +391,8 @@ static void goto_actions(void)
     save_column(start_symbol + 1, k);
 
     j = 10;
-    for (i = start_symbol + 2; i < nsyms; i++)
+
+    for (i = start_symbol + 2; i < nsyms; ++i)
     {
 	if (j >= 10)
 	{
@@ -418,7 +426,7 @@ static void sort_actions(void)
   order = NEW2(nvectors, Yshort);
   nentries = 0;
 
-  for (i = 0; i < nvectors; i++)
+  for (i = 0; i < nvectors; ++i)
     {
       if (tally[i] > 0)
 	{
@@ -427,16 +435,16 @@ static void sort_actions(void)
 	  j = nentries - 1;
 
 	  while (j >= 0 && (width[order[j]] < w))
-	    j--;
+	    --j;
 
 	  while (j >= 0 && (width[order[j]] == w) && (tally[order[j]] < t))
-	    j--;
+	    --j;
 
-	  for (k = nentries - 1; k > j; k--)
+	  for (k = nentries - 1; k > j; --k)
 	    order[k + 1] = order[k];
 
 	  order[j + 1] = i;
-	  nentries++;
+	  ++nentries;
 	}
     }
 }
@@ -510,14 +518,15 @@ int matching_vector(size_t vector)
     t = tally[i];
     w = width[i];
 
-    for (prev = vector - 1; prev >= 0; prev--)
+    for (prev = vector - 1; prev >= 0; --prev)
     {
 	j = order[prev];
 	if (width[j] != w || tally[j] != t)
 	    return (-1);
 
 	match = 1;
-	for (k = 0; match && k < t; k++)
+
+	for (k = 0; match && k < t; ++k)
 	{
 	    if (tos[j][k] != tos[i][k] || froms[j][k] != froms[i][k])
 		match = 0;
@@ -559,7 +568,8 @@ int pack_vector(size_t vector)
 	if (j == 0)
 	    continue;
 	ok = 1;
-	for (k = 0; ok && k < t; k++)
+
+	for (k = 0; ok && k < t; ++k)
 	{
 	    loc = j + from[k];
 	    if (loc >= maxtable)
@@ -586,14 +596,15 @@ int pack_vector(size_t vector)
 	    if (check[loc] != -1)
 		ok = 0;
 	}
-	for (k = 0; ok && k < vector; k++)
+
+	for (k = 0; ok && k < vector; ++k)
 	{
 	    if (pos[k] == j)
 		ok = 0;
 	}
 	if (ok)
 	{
-	    for (k = 0; k < t; k++)
+	    for (k = 0; k < t; ++k)
 	    {
 		loc = j + from[k];
 		table[loc] = to[k];
@@ -620,7 +631,8 @@ void output_base()
 
     BtYacc_printf(output_file, "int yysindex[] = {%39d,", base[0]);
     j = 10;
-    for (i = 1; i < nstates; i++) {
+
+    for (i = 1; i < nstates; ++i) {
 	if (j >= 10) {
 	    if (!rflag) ++outline;
 
@@ -640,7 +652,8 @@ void output_base()
 
     BtYacc_printf(output_file, "int yyrindex[] = {%39d,", base[nstates]);
     j = 10;
-    for (i = nstates + 1; i < 2*nstates; i++) {
+
+    for (i = nstates + 1; i < 2 * nstates; ++i) {
 	if (j >= 10) {
 	    if (!rflag) ++outline;
 
@@ -660,7 +673,8 @@ void output_base()
 
     BtYacc_printf(output_file, "int yycindex[] = {%39d,", base[2*nstates]);
     j = 10;
-    for (i = 2*nstates + 1; i < 3*nstates; i++) {
+
+    for (i = 2 * nstates + 1; i < 3 * nstates; ++i) {
 	if (j >= 10) {
 	    if (!rflag) ++outline;
 
@@ -681,7 +695,8 @@ void output_base()
 
     BtYacc_printf(output_file, "int yygindex[] = {%39d,", base[3*nstates]);
     j = 10;
-    for (i = 3*nstates + 1; i < nvectors - 1; i++) {
+
+    for (i = 3 * nstates + 1; i < nvectors - 1; ++i) {
 	if (j >= 10) {
 	    if (!rflag) ++outline;
 
@@ -722,7 +737,8 @@ void output_table()
     BtYacc_printf(output_file, "int yytable[] = {%40d,", table[0]);
 
     j = 10;
-    for (i = 1; i <= high; i++)
+
+    for (i = 1; i <= high; ++i)
     {
 	if (j >= 10)
 	{
@@ -756,7 +772,8 @@ void output_check()
     BtYacc_printf(output_file, "int yycheck[] = {%40d,", check[0]);
 
     j = 10;
-    for (i = 1; i <= high; i++)
+
+    for (i = 1; i <= high; ++i)
     {
 	if (j >= 10)
 	{
@@ -788,7 +805,8 @@ void output_ctable()
     BtYacc_printf(output_file, "int yyctable[] = {%39d,", conflicts ? conflicts[0] : 0);
 
     j = 10;
-    for (i = 1; i < nconflicts; i++)
+
+    for (i = 1; i < nconflicts; ++i)
     {
 	if (j >= 10)
 	{
@@ -1368,7 +1386,7 @@ void write_section(char const * section_name)
     size_t i;
     struct section *sl;
 
-    for(sl=&section_list[0]; sl->name; sl++) {
+    for (sl = &section_list[0]; sl->name; ++sl) {
       if(strcmp(sl->name,section_name)==0) {
 	break;
       }

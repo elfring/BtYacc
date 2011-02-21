@@ -77,9 +77,12 @@ char	*r = 0;
 int strnscmp(const char *a, const char *b)
 {
     while(1) {
-	while (isspace(*a)) a++;
-	while (isspace(*b)) b++;
-	while (*a && *a == *b) a++,b++;
+	while (isspace(*a)) ++a;
+
+	while (isspace(*b)) ++b;
+
+	while (*a && *a == *b) ++a, ++b;
+
 	if (isspace(*a)) {
 	    if (isalnum(a[-1]) && isalnum(*b))
 		break; }
@@ -98,6 +101,7 @@ unsigned int	h = 0;
     while (*s) {
 	if (!isspace(*s))
 	    h = (h<<5) - h + *s;
-	s++; }
+	++s; }
+
     return h;
 }

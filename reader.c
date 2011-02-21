@@ -114,7 +114,8 @@ char *get_line() {
     char var_name[80];
     size_t ii = 0;
     char **ps;
-    for(i=7; line[i]!='\n' && line[i]!=' '; i++, ii++) {
+
+    for (i = 7; line[i] != '\n' && line[i] != ' '; ++i, ++ii) {
       var_name[ii] = line[i];
     }
     var_name[ii] = 0;
@@ -122,7 +123,7 @@ char *get_line() {
       error(lineno, 0, 0, "Cannot have nested %%ifdef");
     }
     /* Find the preprocessor variable */
-    for(ps=&defd_vars[0]; *ps; ps++) {
+    for (ps = &defd_vars[0]; *ps; ++ps) {
       if(strcmp(*ps,var_name)==0) {
 	break;
       }
@@ -153,7 +154,8 @@ char *get_line() {
   /* VM: Process %include line */
   if(strncmp(&line[0], "%include ", 9)==0) {
     size_t ii = 0;
-    for(i=9; line[i]!='\n' && line[i]!=' '; i++, ii++) {
+
+    for (i = 9; line[i] != '\n' && line[i] != ' '; ++i, ++ii) {
       inc_file_name[ii] = line[i];
     }
     inc_file_name[ii] = 0;
@@ -174,12 +176,12 @@ char *get_line() {
     char var_name[80];
     size_t ii = 0;
     char **ps;
-    for(i=8; line[i]!='\n' && line[i]!=' '; i++, ii++) {
+    for (i = 8; line[i] != '\n' && line[i] != ' '; ++i, ++ii) {
       var_name[ii] = line[i];
     }
     var_name[ii] = 0;
     /* Find the preprocessor variable */
-    for(ps=&defd_vars[0]; *ps; ps++) {
+    for (ps = &defd_vars[0]; *ps; ++ps) {
       if(strcmp(*ps,var_name)==0) {
 	error(lineno, 0, 0, "Preprocessor variable %s already defined", var_name);
       }
@@ -760,7 +762,8 @@ static char *scan_id(void)
 {
 char	*b = cptr;
 
-    while (isalnum(*cptr) || *cptr == '_' || *cptr == '$') cptr++;
+    while (isalnum(*cptr) || *cptr == '_' || *cptr == '$') ++cptr;
+
     return cache_tag(b, cptr-b);
 }
 
@@ -820,7 +823,9 @@ char	*tags[MAXARGS];
 int	args = 0, c;
 
     if (bp->args >= 0) retyped_warning(bp->name);
-    cptr++; /* skip open paren */
+
+    ++cptr; /* skip open paren */
+
     for (;;) {
 	c = nextc();
 	if (c == EOF) unexpected_EOF();
@@ -829,7 +834,8 @@ int	args = 0, c;
 	c = nextc();
 	if (c == ')') break;
 	if (c == EOF) unexpected_EOF(); }
-    cptr++; /* skip close paren */
+
+    ++cptr; /* skip close paren */
     bp->args = args;
     if (!(bp->argnames = NEW2(args, char *))) no_space();
     if (!(bp->argtags = NEW2(args, char *))) no_space();
@@ -989,7 +995,7 @@ char		*a_cptr = a_line + (cptr - line - 1);
     rescan_lineno = lineno;
     while ((c = *cptr++) != ')' || depth || quote) {
 	if (c == ',' && !quote && !depth) {
-	    len++;
+	    ++len;
 	    mputc(s, 0);
 	    continue; }
 	mputc(s, c);
@@ -1005,8 +1011,8 @@ char		*a_cptr = a_line + (cptr - line - 1);
 	    else if (c == '\\') {
 		if (*cptr != '\n') mputc(s, *cptr++); } }
 	else {
-	    if (c == '(') depth++;
-	    else if (c == ')') depth--;
+	    if (c == '(') ++depth;
+	    else if (c == ')') --depth;
 	    else if (c == '\"' || c == '\'') quote = c; } }
     if (alen) *alen = len;
     FREE(a_line);
@@ -1017,10 +1023,12 @@ static char *parse_id(char *p, char **save)
 {
 char	*b;
 
-    while (isspace(*p)) if (*p++ == '\n') rescan_lineno++;
+    while (isspace(*p)) if (*p++ == '\n') ++rescan_lineno;
+
     if (!isalpha(*p) && *p != '_') return 0;
     b = p;
-    while (isalnum(*p) || *p == '_' || *p == '$') p++;
+    while (isalnum(*p) || *p == '_' || *p == '$') ++p;
+
     if (save) {
 	*save = cache_tag(b, p-b); }
     return p;
@@ -1030,10 +1038,12 @@ static char *parse_int(char *p, int *save)
 {
 int	neg=0, val=0;
 
-    while (isspace(*p)) if (*p++ == '\n') rescan_lineno++;
+    while (isspace(*p)) if (*p++ == '\n') ++rescan_lineno;
+
     if (*p == '-') {
 	neg=1;
-	p++; }
+	++p; }
+
     if (!isdigit(*p)) return 0;
     while (isdigit(*p))
 	val = val*10 + *p++ - '0';
@@ -1058,14 +1068,20 @@ size_t	i, redec = 0;
 	    !(a->argtags = NEW2(argslen, char *)))
 	    no_space(); }
     if (!args) return;
-    for (i=0; i<argslen; i++) {
-	while (isspace(*p)) if (*p++ == '\n') rescan_lineno++;
+
+    for (i = 0; i < argslen; ++i) {
+	while (isspace(*p)) if (*p++ == '\n') ++rescan_lineno;
+
 	if (*p++ != '$') bad_formals();
-	while (isspace(*p)) if (*p++ == '\n') rescan_lineno++;
+
+	while (isspace(*p)) if (*p++ == '\n') ++rescan_lineno;
+
 	if (*p == '<') {
 	    havetags = 1;
 	    if (!(p = parse_id(p+1, &tmp))) bad_formals();
-	    while (isspace(*p)) if (*p++ == '\n') rescan_lineno++;
+
+	    while (isspace(*p)) if (*p++ == '\n') ++rescan_lineno;
+
 	    if (*p++ != '>') bad_formals();
 	    if (redec) {
 		if (a->argtags[i] != tmp)
@@ -1077,7 +1093,9 @@ size_t	i, redec = 0;
 	else if (!redec)
 	    a->argtags[i] = 0;
 	if (!(p = parse_id(p, &a->argnames[i]))) bad_formals();
-	while (isspace(*p)) if (*p++ == '\n') rescan_lineno++;
+
+	while (isspace(*p)) if (*p++ == '\n') ++rescan_lineno;
+
 	if (*p++) bad_formals(); }
     free(args);
 }
@@ -1092,13 +1110,16 @@ bucket		**rhs;
 
     maxoffset = n = 0;
     for (i = nitems - 1; pitem[i]; --i) {
-	n++;
+	++n;
+
 	if (pitem[i]->class != ARGUMENT)
-	    maxoffset++; }
+	   ++maxoffset; }
+
     if (maxoffset > 0) {
 	offsets = NEW2(maxoffset+1, Yshort);
 	if (offsets == 0) no_space(); }
-    for (j=0, i++; i<nitems; i++)
+
+    for (j = 0, ++i; i < nitems; ++i)
 	if (pitem[i]->class != ARGUMENT)
 	    offsets[++j] = i - nitems + 1;
     rhs = pitem + nitems - 1;
@@ -1134,7 +1155,8 @@ bucket		**rhs;
 	  char	*arg;
 	  if (!(p = parse_id(p, &arg)))
 	    dollar_error(rescan_lineno, 0, 0);
-	  for (i=plhs[nrules]->args-1; i>=0; i--)
+
+	  for (i = plhs[nrules]->args - 1; i >= 0; --i)
 	    if (arg == plhs[nrules]->argnames[i]) break;
 	  if (i<0)
 	    error(rescan_lineno, 0, 0, "unknown argument $%s", arg);
@@ -1147,7 +1169,8 @@ bucket		**rhs;
 	else
 	  dollar_error(rescan_lineno, 0, 0); 
       } else {
-	if (*p == '\n') rescan_lineno++;
+	if (*p == '\n') ++rescan_lineno;
+
 	mputc(c, *p++); 
       } 
     }
@@ -1192,7 +1215,7 @@ static void clean_arg_cache(void)
 struct arg_cache	*e, *t;
 size_t			i;
 
-    for (i=0; i<ARG_CACHE_SIZE; i++) {
+    for (i = 0; i < ARG_CACHE_SIZE; ++i) {
 	for (e=arg_cache[i]; (t=e); e=e->next, FREE(t))
 	    free(e->code);
 	arg_cache[i] = 0; }
@@ -1369,7 +1392,8 @@ void add_symbol()
 	if (plhs[nrules]->args != bp->args)
 	    error(lineno, line, cptr, "Wrong number of default arguments "
 		  "for %s", bp->name);
-	for (i=bp->args-1; i>=0; i--)
+
+	for (i = bp->args - 1; i >= 0; --i)
 	    if (plhs[nrules]->argtags[i] != bp->argtags[i])
 		error(lineno, line, cptr, "Wrong type for default argument "
 		      "%d to %s", i+1, bp->name); }
@@ -1379,7 +1403,8 @@ void add_symbol()
     if (args != 0) {
 	char	*ap;
 	size_t	i;
-	for (ap=args, i=0; i<argslen; i++)
+
+	for (ap = args, i = 0; i < argslen; ++i)
 	    ap = insert_arg_rule(ap, bp->argtags[i]);
 	free(args); }
 
@@ -1421,13 +1446,16 @@ void copy_action()
 
     maxoffset = n = 0;
     for (i = nitems - 1; pitem[i]; --i) {
-	n++;
+	++n;
+
 	if (pitem[i]->class != ARGUMENT)
-	    maxoffset++; }
+	   ++maxoffset; }
+
     if (maxoffset > 0) {
 	offsets = NEW2(maxoffset+1, Yshort);
 	if (offsets == 0) no_space(); }
-    for (j=0, i++; i<nitems; i++)
+
+    for (j = 0, ++i; i < nitems; ++i)
 	if (pitem[i]->class != ARGUMENT)
 	    offsets[++j] = i - nitems + 1;
     rhs = pitem + nitems - 1;
@@ -1467,7 +1495,8 @@ loop:
 		goto loop; }
 	    else if (isalpha(c) || c == '_') {
 		char *arg = scan_id();
-		for (i=plhs[nrules]->args-1; i>=0; i--)
+
+		for (i = plhs[nrules]->args - 1; i >= 0; --i)
 		    if (arg == plhs[nrules]->argnames[i]) break;
 		if (i<0)
 		    error(d_lineno,d_line,d_cptr,"unknown argument %s",arg);
@@ -1519,7 +1548,8 @@ loop:
 	    char *arg;
 	    ++cptr;
 	    arg = scan_id();
-	    for (i=plhs[nrules]->args-1; i>=0; i--)
+
+	    for (i = plhs[nrules]->args - 1; i >= 0; --i)
 		if (arg == plhs[nrules]->argnames[i]) break;
 	    if (i<0)
 		error(lineno, line, cptr, "unknown argument %s", arg);

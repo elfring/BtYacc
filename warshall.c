@@ -44,7 +44,7 @@ void transitive_closure(unsigned *R, int n)
 	if (mask == 0)
 	{
 	    mask = 1;
-	    cword++;
+	    ++cword;
 	}
 
 	rowi += rowsize;
@@ -72,7 +72,7 @@ void reflexive_transitive_closure(unsigned *R, int n)
 	if (mask == 0)
 	{
 	    mask = 1;
-	    rp++;
+	    ++rp;
 	}
 
 	rp += rowsize;

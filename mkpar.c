@@ -75,7 +75,8 @@ static void remove_conflicts(void)
     RRtotal = 0;
     SRconflicts = NEW2(nstates, Yshort);
     RRconflicts = NEW2(nstates, Yshort);
-    for (i = 0; i < nstates; i++) {
+
+    for (i = 0; i < nstates; ++i) {
 	SRcount = 0;
 	RRcount = 0;
 	symbol = -1;
@@ -85,7 +86,7 @@ static void remove_conflicts(void)
 		pref = p;
 		symbol = p->symbol; }
 	    else if (i == final_state && symbol == 0) {
-		SRcount++;
+		++SRcount;
 		p->suppressed = 1;
 		if (!pref->suppressed)
 		    pref->suppressed = 1; }
@@ -105,12 +106,12 @@ static void remove_conflicts(void)
 			pref->suppressed = 2;
 			p->suppressed = 2; } }
 		else {
-		    SRcount++;
+		    ++SRcount;
 		    p->suppressed = 1;
 		    if (!pref->suppressed)
 			pref->suppressed = 1; } }
 	    else {
-		RRcount++;
+		++RRcount;
 		p->suppressed = 1;
 		if (!pref->suppressed)
 		    pref->suppressed = 1; } }
@@ -145,7 +146,7 @@ static void defreds(void)
     register int unsigned i;
 
     defred = NEW2(nstates, Yshort);
-    for (i = 0; i < nstates; i++)
+    for (i = 0; i < nstates; ++i)
 	defred[i] = sole_reduction(i);
 }
 
@@ -154,7 +155,7 @@ void make_parser()
     register int unsigned i;
 
     parser = NEW2(nstates, action *);
-    for (i = 0; i < nstates; i++)
+    for (i = 0; i < nstates; ++i)
 	parser[i] = parse_actions(i);
 
     find_final_state();
@@ -186,7 +187,8 @@ action* get_shifts(int unsigned stateno)
     if (sp)
     {
 	to_state = sp->shift;
-	for (i = sp->nshifts - 1; i >= 0; i--)
+
+	for (i = sp->nshifts - 1; i >= 0; --i)
 	{
 	    k = to_state[i];
 	    symbol = accessing_symbol[k];
@@ -215,11 +217,11 @@ action* add_reductions(int unsigned stateno, action* actions)
     tokensetsize = WORDSIZE(ntokens);
     m = lookaheads[stateno];
     n = lookaheads[stateno + 1];
-    for (i = m; i < n; i++)
+    for (i = m; i < n; ++i)
     {
 	ruleno = LAruleno[i];
 	rowp = LA + i * tokensetsize;
-	for (j = ntokens - 1; j >= 0; j--)
+	for (j = ntokens - 1; j >= 0; --j)
 	{
 	    if (BIT(rowp, j))
 		actions = add_reduce(actions, ruleno, j);
@@ -308,7 +310,7 @@ void free_parser()
 {
   register size_t i;
 
-  for (i = 0; i < nstates; i++)
+  for (i = 0; i < nstates; ++i)
     free_action_row(parser[i]);
 
   FREE(parser);

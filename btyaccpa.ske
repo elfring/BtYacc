@@ -302,7 +302,8 @@ int yyparse() {
           printf("yydebug[%d]: backtracking 1 token\n", 
 		 (int)yytrial);
 #endif
-        ctry++; 
+
+        ++ctry;
       }
       save->ctry = ctry;
       if (!yyps->save) {
@@ -327,7 +328,7 @@ int yyparse() {
         } 
       }
       if (yychar >= 0) {
-        yylvp--, yylpp--, yylexp--;
+        --yylvp, --yylpp, --yylexp;
         yychar = -1; 
       }
       save->lexeme = yylvp - yylvals;
@@ -340,7 +341,8 @@ int yyparse() {
                yydepth, (int)yytrial, yystate, yyctable[ctry]);
 #endif
       if (yychar < 0)
-        yylvp++, yylpp++, yylexp++;
+        ++yylvp, ++yylpp, ++yylexp;
+
       yychar = -1;
       if (yyps->errflag > 0) --yyps->errflag;
       yystate = yyctable[ctry];
@@ -540,7 +542,8 @@ yyreduce:
     if (yym) {
       int i;
       printf("<");
-      for (i=yym; i>0; i--) {
+
+      for (i = yym; i > 0; --i) {
         if (i!=yym) printf(", ");
         YYDBPR((yyps->vsp)[1-i]);
       }
@@ -685,12 +688,12 @@ yyabort:
   }
 
   YYSTYPE *pv;
-  for(pv=yyps->vs; pv<yyps->vsp; pv++) {
+  for (pv = yyps->vs; pv < yyps->vsp; ++pv) {
     YYDELETEVAL(*pv,2);
   }
 
   YYPOSN *pp;
-  for(pp=yyps->ps; pp<yyps->psp; pp++) {
+  for (pp = yyps->ps; pp < yyps->psp; ++pp) {
     YYDELETEPOSN(*pp,2);
   }
 
@@ -738,9 +741,9 @@ int YYLex1() {
       }
       *yylexp = yylex();
       *yylvp++ = yylval;
-      yylve++;
+      ++yylve;
       *yylpp++ = yyposn;
-      yylpe++;
+      ++yylpe;
       return *yylexp++;
     } else {
       return yylex();
@@ -775,14 +778,16 @@ int yyexpand() {
 
 void YYSCopy(YYSTYPE *to, YYSTYPE *from, int size) {
   int i;                             
-  for (i = size-1; i >= 0; i--) {
+
+  for (i = size - 1; i >= 0; --i) {
     to[i] = from[i];
   }
 }
 
 void YYPCopy(YYPOSN *to, YYPOSN *from, int size) {
   int i;                             
-  for (i = size-1; i >= 0; i--) {
+
+  for (i = size-1; i >= 0; --i) {
     to[i] = from[i];
   }
 }

@@ -155,7 +155,7 @@ void error(int unsigned lineno, char const * line, char const * cptr, char const
 
   va_end(args);
   FileError("%s", sbuf);
-  read_errs++;
+  ++read_errs;
 }
 
 void syntax_error(int unsigned lineno, char const * line, char const * cptr) {

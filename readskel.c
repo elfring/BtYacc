@@ -74,7 +74,8 @@ FILE	*fp;
 	open_error(name);
     while(fgets(buf, 255, fp)) {
 	if ((sline = eline))
-	    line++;
+	    ++line;
+
 	if ((i = strlen(buf)) == 0)
 	    continue;
 	if (buf[i-1] == '\n') {
@@ -91,12 +92,15 @@ FILE	*fp;
 	      section_list[section].ptr = fin_section();
 	    }
 	    section = -1;
-	    while(*p && isspace(*p)) p++;
+
+	    while(*p && isspace(*p)) ++p;
+
 	    if (isalpha(*p)) {
 	      char *e = p;
 	      while(isalnum(*++e));
 	      *e = 0;
-	      for (i=0; section_list[i].name; i++)
+
+	      for (i = 0; section_list[i].name; ++i)
 		if (!strcmp(section_list[i].name, p))
 		  section = i; 
 	    }

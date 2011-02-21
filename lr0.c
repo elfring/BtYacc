@@ -45,13 +45,14 @@ static void allocate_itemsets(void)
     symbol_count = NEW2(nsyms, Yshort);
 
     item_end = ritem + nitems;
-    for (itemp = ritem; itemp < item_end; itemp++)
+
+    for (itemp = ritem; itemp < item_end; ++itemp)
     {
 	symbol = *itemp;
 	if (symbol >= 0)
 	{
-	    count++;
-	    symbol_count[symbol]++;
+	    ++count;
+	    ++(symbol_count[symbol]);
 	}
     }
 
@@ -60,7 +61,8 @@ static void allocate_itemsets(void)
 
     count = 0;
     max = 0;
-    for (i = 0; i < nsyms; i++)
+
+    for (i = 0; i < nsyms; ++i)
     {
 	kernel_base[i] = kernel_items + count;
 	count += symbol_count[i];
@@ -113,7 +115,7 @@ static core* new_state(int symbol)
     last_state->next = p;
     last_state = p;
 
-    nstates++;
+    ++nstates;
 
     return (p);
 }
@@ -190,19 +192,19 @@ static void append_states(void)
 #ifdef	TRACE
     BtYacc_logs("Entering append_states()\n");
 #endif
-    for (i = 1; i < nshifts; i++)
+    for (i = 1; i < nshifts; ++i)
     {
 	symbol = shift_symbol[i];
 	j = i;
 	while (j > 0 && shift_symbol[j - 1] > symbol)
 	{
 	    shift_symbol[j] = shift_symbol[j - 1];
-	    j--;
+	    --j;
 	}
 	shift_symbol[j] = symbol;
     }
 
-    for (i = 0; i < nshifts; i++)
+    for (i = 0; i < nshifts; ++i)
     {
 	symbol = shift_symbol[i];
 	shiftset[i] = get_state(symbol);
@@ -257,7 +259,7 @@ static void new_itemsets(void)
     register Yshort *ksp;
     register int symbol;
 
-    for (i = 0; i < nsyms; i++)
+    for (i = 0; i < nsyms; ++i)
 	kernel_end[i] = 0;
 
     shiftcount = 0;
@@ -295,7 +297,8 @@ static void save_reductions(void)
     register Yshort *rend;
 
     count = 0;
-    for (isp = itemset; isp < itemsetend; isp++)
+
+    for (isp = itemset; isp < itemsetend; ++isp)
     {
 	item = ritem[*isp];
 	if (item < 0)
@@ -476,10 +479,11 @@ static void print_derives(void)
 
     printf("\nDERIVES\n\n");
 
-    for (i = start_symbol; i < nsyms; i++)
+    for (i = start_symbol; i < nsyms; ++i)
     {
 	printf("%s derives ", symbol_name[i]);
-	for (sp = derives[i]; *sp >= 0; sp++)
+
+	for (sp = derives[i]; *sp >= 0; ++sp)
 	{
 	    printf("  %d", *sp);
 	}
@@ -501,10 +505,12 @@ static void set_derives(void)
     rules = NEW2(nvars + nrules, Yshort);
 
     k = 0;
-    for (lhs = start_symbol; lhs < nsyms; lhs++)
+
+    for (lhs = start_symbol; lhs < nsyms; ++lhs)
     {
 	derives[lhs] = rules + k;
-	for (i = 0; i < nrules; i++)
+
+	for (i = 0; i < nrules; ++i)
 	{
 	    if (rlhs[i] == lhs)
 	    {
@@ -544,7 +550,8 @@ static void set_nullable(void)
     while (!done)
     {
 	done = 1;
-	for (i = 1; i < nitems; i++)
+
+	for (i = 1; i < nitems; ++i)
 	{
 	    empty = 1;
 	    while ((j = ritem[i]) >= 0)
@@ -566,7 +573,7 @@ static void set_nullable(void)
     }
 
 #ifdef DEBUG
-    for (i = 0; i < nsyms; i++)
+    for (i = 0; i < nsyms; ++i)
     {
 	if (nullable[i])
 	    printf("%s is nullable\n", symbol_name[i]);
