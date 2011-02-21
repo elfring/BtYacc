@@ -64,27 +64,28 @@ typedef int Yshort;
 #define CODE_SUFFIX     "_code.c"
 #define VERBOSE_SUFFIX  ".output"
 
-/* keyword codes */
+typedef enum keyword_code_enumeration
+{
+TOKEN = 0,
+LEFT = 1,
+RIGHT = 2,
+NONASSOC = 3,
+MARK = 4,
+TEXT = 5,
+TYPE = 6,
+START = 7,
+UNION = 8,
+IDENT = 9
+} BtYacc_keyword_code;
 
-#define TOKEN 0
-#define LEFT 1
-#define RIGHT 2
-#define NONASSOC 3
-#define MARK 4
-#define TEXT 5
-#define TYPE 6
-#define START 7
-#define UNION 8
-#define IDENT 9
-
-
-/*  symbol classes  */
-
-#define UNKNOWN 0
-#define TERM 1
-#define NONTERM 2
-#define ACTION 3
-#define ARGUMENT 4
+typedef enum symbol_class_enumeration
+{
+UNKNOWN = 0,
+TERM = 1,
+NONTERM = 2,
+ACTION = 3,
+ARGUMENT = 4
+} BtYacc_symbol_class;
 
 
 /*  the undefined value  */
@@ -92,10 +93,11 @@ typedef int Yshort;
 #define UNDEFINED (-1)
 
 
-/*  action codes  */
-
-#define SHIFT 1
-#define REDUCE 2
+typedef enum action_code_enumeration
+{
+SHIFT = 1,
+REDUCE = 2
+} BtYacc_action_code;
 
 
 /*  character macros  */
