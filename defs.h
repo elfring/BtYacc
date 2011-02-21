@@ -195,8 +195,8 @@ struct action
 };
 
 struct section {
-    char   *name;
-    char  **ptr;
+    char const * name;
+    char const * const * ptr;
 };
 
 extern struct section section_list[];
@@ -216,11 +216,11 @@ extern char *line;
 extern int lineno;
 extern int outline;
 
-extern char *banner[];
-extern char *tables[];
-extern char *header[];
-extern char *body[];
-extern char *trailer[];
+extern char const * const banner[];
+extern char const * const tables[];
+extern char const * const header[];
+extern char const * const body[];
+extern char const * const trailer[];
 
 extern char *action_file_name;
 extern char *code_file_name;
@@ -251,7 +251,7 @@ extern int nvars;
 extern int ntags;
 
 extern char unionized;
-extern char line_format[];
+extern char const line_format[];
 
 extern int   start_symbol;
 extern char  **symbol_name;
@@ -307,41 +307,41 @@ void closure(Yshort *, int);
 void finalize_closure(void);
 
 /* error.c */
-void fatal(char *);
+void fatal(char const * msg);
 void no_space(void);
-void open_error(char *);
+void open_error(char const * filename);
 void unexpected_EOF(void);
-void print_pos(char *, char *);
-void error(int, char *, char *, char *, ...);
-void syntax_error(int, char *, char *);
-void unterminated_comment(int, char *, char *);
-void unterminated_string(int, char *, char *);
-void unterminated_text(int, char *, char *);
-void unterminated_union(int, char *, char *);
-void over_unionized(char *);
-void illegal_tag(int, char *, char *);
-void illegal_character(char *);
-void used_reserved(char *);
-void tokenized_start(char *);
-void retyped_warning(char *);
-void reprec_warning(char *);
-void revalued_warning(char *);
-void terminal_start(char *);
+void print_pos(char const * st_line, char const * st_cptr);
+void error(int unsigned lineno, char const * line, char const * cptr, char const * msg, ...);
+void syntax_error(int unsigned lineno, char const * line, char const * cptr);
+void unterminated_comment(int unsigned lineno, char const * line, char const * cptr);
+void unterminated_string(int unsigned lineno, char const * line, char const * cptr);
+void unterminated_text(int unsigned lineno, char const * line, char const * cptr);
+void unterminated_union(int unsigned lineno, char const * line, char const * cptr);
+void over_unionized(char const * cptr);
+void illegal_tag(int unsigned lineno, char const * line, char const * cptr);
+void illegal_character(char const * cptr);
+void used_reserved(char const * s);
+void tokenized_start(char const * s);
+void retyped_warning(char const * s);
+void reprec_warning(char const * s);
+void revalued_warning(char const * s);
+void terminal_start(char const * s);
 void restarted_warning(void);
 void no_grammar(void);
 void terminal_lhs(int);
 void prec_redeclared(void);
-void unterminated_action(int, char *, char *);
-void unterminated_arglist(int, char *, char *);
+void unterminated_action(int unsigned lineno, char const * line, char const * cptr);
+void unterminated_arglist(int unsigned lineno, char const * line, char const * cptr);
 void bad_formals(void);
 void dollar_warning(int, int);
-void dollar_error(int, char *, char *);
+void dollar_error(int unsigned lineno, char const * line, char const * cptr);
 void untyped_lhs(void);
-void untyped_rhs(int, char *);
+void untyped_rhs(int i, char const * s);
 void unknown_rhs(int);
 void default_action_warning(void);
-void undefined_goal(char *);
-void undefined_symbol_warning(char *);
+void undefined_goal(char const * s);
+void undefined_symbol_warning(char const * s);
 
 /* lalr.c */
 void lalr(void);
@@ -382,7 +382,7 @@ void output_base(void);
 void output_table(void);
 void output_check(void);
 void output_ctable(void);
-int is_C_identifier(char *);
+int is_C_identifier(char const * name);
 void output_defines(void);
 void output_stored_text(void);
 void output_debug(void);
@@ -392,8 +392,7 @@ void output_semantic_actions(void);
 void free_itemsets(void);
 void free_shifts(void);
 void free_reductions(void);
-void write_section(char *section_name);
-
+void write_section(char const * section_name);
 
 /* reader.c */
 int cachec(int);
@@ -409,7 +408,7 @@ void copy_text(void);
 void copy_union(void);
 int hexval(int);
 bucket *get_literal(void);
-int is_reserved(char *);
+int is_reserved(char const * name);
 bucket *get_name(void);
 int get_number(void);
 char *get_tag(void);
@@ -437,12 +436,12 @@ void print_grammar(void);
 void reader(void);
 
 /* readskel.c */
-void read_skel(char *);
+void read_skel(char const * name);
 
 /* symtab.c */
-int hash(char *);
-bucket *make_bucket(char *);
-bucket *lookup(char *);
+int hash(char const * name);
+bucket* make_bucket(char const * name);
+bucket* lookup(char const * name);
 void create_symbol_table(void);
 void free_symbol_table(void);
 void free_symbols(void);
@@ -456,8 +455,8 @@ void print_conflicts(int);
 void print_core(int);
 void print_nulls(int);
 void print_actions(int);
-void print_shifts(action *);
-void print_reductions(action *, int);
+void print_shifts(action const * p);
+void print_reductions(action const * p, int defred);
 void print_gotos(int);
 
 /* warshall.c */

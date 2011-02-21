@@ -239,10 +239,10 @@ void print_actions(int stateno)
 }
 
 
-void print_shifts(action *p)
+void print_shifts(action const * p)
 {
     register int count;
-    register action *q;
+    register action const * q;
 
     count = 0;
     for (q = p; q; q = q->next)
@@ -263,10 +263,10 @@ void print_shifts(action *p)
 }
 
 
-void print_reductions(action *p, int defred)
+void print_reductions(action const * p, int defred)
 {
     register int k, anyreds;
-    register action *q;
+    register action const * q;
 
     anyreds = 0;
     for (q = p; q ; q = q->next)

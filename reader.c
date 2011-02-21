@@ -46,7 +46,7 @@ bucket **plhs;
 int name_pool_size;
 char *name_pool;
 
-char line_format[] = "#line %d \"%s\"\n";
+char const line_format[] = "#line %d \"%s\"\n";
 
 int cachec(int c)
 {
@@ -607,19 +607,21 @@ bucket *get_literal()
     return (bp);
 }
 
-int is_reserved(char *name)
+int is_reserved(char const * name)
 {
-    char *s;
-
     if (strcmp(name, ".") == 0 ||
 	strcmp(name, "$accept") == 0 ||
 	strcmp(name, "$end") == 0)
 	return (1);
 
     if (name[0] == '$' && name[1] == '$' && isdigit(name[2])) {
-	s = name + 3;
+	char const * s = name + 3;
+
 	while (isdigit(*s)) ++s;
-	if (*s == NUL) return (1); }
+
+	if (*s == NUL)
+		return (1);
+    }
 
     return (0);
 }

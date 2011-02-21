@@ -7,13 +7,12 @@
 
 extern FILE *inc_file;
 extern char inc_file_name[];
-void FileError(char *fmt, ...);
 
 /*
  * VM: print error message with file coordinates.
  * Do it in style acceptable to emacs.
  */
-void FileError(char *fmt, ...) {
+static void FileError(char const * fmt, ...) {
   va_list args;
 
   fprintf(stderr, "%s:%d: ", (inc_file?inc_file_name:input_file_name), lineno);
@@ -23,7 +22,7 @@ void FileError(char *fmt, ...) {
   fprintf(stderr, "\n");
 }
 
-void fatal(char *msg)
+void fatal(char const * msg)
 {
     fprintf(stderr, "fatal - %s\n", msg);
     done(2);
@@ -37,7 +36,7 @@ void no_space()
 }
 
 
-void open_error(char *filename)
+void open_error(char const * filename)
 {
     fprintf(stderr, "fatal - cannot open \"%s\"\n", filename);
     done(2);
@@ -51,9 +50,9 @@ void unexpected_EOF()
 }
 
 
-void print_pos(char *st_line, char *st_cptr)
+void print_pos(char const * st_line, char const * st_cptr)
 {
-    register char *s;
+    register char const * s;
 
     if (st_line == 0) return;
     for (s = st_line; *s != '\n'; ++s)
@@ -77,7 +76,7 @@ void print_pos(char *st_line, char *st_cptr)
 
 int read_errs = 0;
 
-void error(int lineno, char *line, char *cptr, char *msg, ...)
+void error(int unsigned lineno, char const * line, char const * cptr, char const * msg, ...)
 {
   char sbuf[512];
   va_list args;
@@ -89,68 +88,65 @@ void error(int lineno, char *line, char *cptr, char *msg, ...)
   read_errs++;
 }
 
-void syntax_error(int lineno, char *line, char *cptr) { 
+void syntax_error(int unsigned lineno, char const * line, char const * cptr) {
   error(lineno, line, cptr, "syntax error"); 
   exit(1);
 }
 
-void unterminated_comment(int lineno, char *line, char *cptr) { 
+void unterminated_comment(int unsigned lineno, char const * line, char const * cptr) {
   error(lineno, line, cptr, "unmatched /*"); 
   exit(1);
 }
 
-void unterminated_string(int lineno, char *line, char *cptr) { 
+void unterminated_string(int unsigned lineno, char const * line, char const * cptr) {
   error(lineno, line, cptr, "unterminated string"); 
   exit(1);
 }
 
-void unterminated_text(int lineno, char *line, char *cptr) { 
+void unterminated_text(int unsigned lineno, char const * line, char const * cptr) {
   error(lineno, line, cptr, "unmatched %%{"); 
   exit(1);
 }
 
-void unterminated_union(int lineno, char *line, char *cptr) { 
+void unterminated_union(int unsigned lineno, char const * line, char const * cptr) {
   error(lineno, line, cptr, "unterminated %%union"); 
   exit(1);
 }
 
-void over_unionized(char *cptr) { 
+void over_unionized(char const * cptr) {
   error(lineno, line, cptr, "too many %%union declarations"); 
   exit(1);
 }
 
-void illegal_tag(int lineno, char *line, char *cptr) { 
+void illegal_tag(int unsigned lineno, char const * line, char const * cptr) {
   error(lineno, line, cptr, "illegal tag"); 
 }
 
-void illegal_character(char *cptr) { 
+void illegal_character(char const * cptr) {
   error(lineno, line, cptr, "illegal character"); 
 }
 
-void used_reserved(char *s) { 
+void used_reserved(char const * s) {
   error(lineno, 0, 0, "illegal use of reserved symbol %s", s); 
 }
 
-void tokenized_start(char *s) { 
+void tokenized_start(char const * s) {
   error(lineno, 0, 0, "the start symbol %s cannot be declared to be a token", s); 
 }
 
-void retyped_warning(char *s) {
+void retyped_warning(char const * s) {
   FileError("the type of %s has been redeclared", s);
 }
 
-
-void reprec_warning(char *s) {
+void reprec_warning(char const * s) {
   FileError("the precedence of %s has been redeclared", s);
 }
 
-
-void revalued_warning(char *s) {
+void revalued_warning(char const * s) {
   FileError("the value of %s has been redeclared", s);
 }
 
-
-void terminal_start(char *s) { 
+void terminal_start(char const * s) {
   error(lineno, 0, 0, "the start symbol %s is a token", s); 
 }
 
@@ -170,11 +166,11 @@ void prec_redeclared() {
   error(lineno, 0, 0, "conflicting %%prec specifiers"); 
 }
 
-void unterminated_action(int lineno, char *line, char *cptr) { 
+void unterminated_action(int unsigned lineno, char const * line, char const * cptr) {
   error(lineno, line, cptr, "unterminated action"); 
 }
 
-void unterminated_arglist(int lineno, char *line, char *cptr) { 
+void unterminated_arglist(int unsigned lineno, char const * line, char const * cptr) {
   error(lineno, line, cptr, "unterminated argument list"); 
 }
 
@@ -189,7 +185,7 @@ void dollar_warning(int a_lineno, int i) {
   lineno = slineno;
 }
 
-void dollar_error(int lineno, char *line, char *cptr) { 
+void dollar_error(int unsigned lineno, char const * line, char const * cptr) {
   error(lineno, line, cptr, "illegal $-name"); 
 }
 
@@ -197,7 +193,7 @@ void untyped_lhs() {
   error(lineno, 0, 0, "$$ is untyped"); 
 }
 
-void untyped_rhs(int i, char *s) { 
+void untyped_rhs(int i, char const * s) {
   error(lineno, 0, 0, "$%d (%s) is untyped", i, s); 
 }
 
@@ -209,10 +205,10 @@ void default_action_warning() {
   FileError("the default action assigns an undefined value to $$");
 }
 
-void undefined_goal(char *s) { 
+void undefined_goal(char const * s) {
   error(lineno, 0, 0, "the start symbol %s is undefined", s); 
 }
 
-void undefined_symbol_warning(char *s) {
+void undefined_symbol_warning(char const * s) {
   fprintf(stderr, "warning - the symbol %s is undefined\n", s);
 }
