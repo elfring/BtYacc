@@ -1,4 +1,5 @@
 #include "defs.h"
+#include "log.h"
 #include <signal.h>
 #include <unistd.h>
 
@@ -66,11 +67,30 @@ Yshort **derives;
 char *nullable;
 
 
+static void file_deletion(FILE* f, char const * name)
+{
+   if (f)
+   {
+      if (fclose(f))
+      {
+         perror("file_deletion: fclose");
+         abort();
+      }
+
+      if (unlink(name))
+      {
+         perror("file_deletion: unlink");
+         abort();
+      }
+   }
+}
+
+
 void done(int k)
 {
-    if (action_file) { fclose(action_file); unlink(action_file_name); }
-    if (text_file) { fclose(text_file); unlink(text_file_name); }
-    if (union_file) { fclose(union_file); unlink(union_file_name); }
+    file_deletion(action_file, action_file_name);
+    file_deletion(text_file, text_file_name);
+    file_deletion(union_file, union_file_name);
     exit(k);
 }
 
@@ -131,8 +151,7 @@ static void signal_setup(void)
 
 static void usage(void)
 {
-    fprintf(stderr, "usage: %s [-dlrtv] [-b file_prefix] [-S skeleton file] "
-		    "filename\n", myname);
+    BtYacc_logf("usage: %s [-dlrtv] [-b file_prefix] [-S skeleton file] filename\n", myname);
     exit(1);
 }
 
@@ -182,6 +201,10 @@ static void getargs(int argc, char **argv)
 		}
 	      }
 	      *ps = MALLOC(strlen(var_name)+1);
+
+	      if (*ps == 0)
+	         no_space();
+
 	      strcpy(*ps, var_name);
 	      *++ps = NULL;
 	    }
@@ -261,6 +284,9 @@ no_more_options:;
     if (!file_prefix) {
       if (input_file_name) {
 	file_prefix = strdup(input_file_name);
+
+	if (!file_prefix) no_space();
+
 	if ((s = strrchr(file_prefix, '.')))
 	  *s = 0; 
       } else {

@@ -1,6 +1,10 @@
 
 #include "defs.h"
 
+#ifdef TRACE
+#include "log.h"
+#endif
+
 extern Yshort *itemset;
 extern Yshort *itemsetend;
 extern unsigned *ruleset;
@@ -87,7 +91,7 @@ static core* new_state(int symbol)
     register Yshort *iend;
 
 #ifdef	TRACE
-    fprintf(stderr, "Entering new_state(%d)\n", symbol);
+    BtYacc_logf("Entering new_state(%d)\n", symbol);
 #endif
 
     if (nstates >= MAXSHORT)
@@ -126,7 +130,7 @@ static int get_state(int symbol)
     register int n;
 
 #ifdef	TRACE
-    fprintf(stderr, "Entering get_state(%d)\n", symbol);
+    BtYacc_logf("Entering get_state(%d)\n", symbol);
 #endif
 
     isp1 = kernel_base[symbol];
@@ -184,7 +188,7 @@ static void append_states(void)
     register int symbol;
 
 #ifdef	TRACE
-    fprintf(stderr, "Entering append_states()\n");
+    BtYacc_logs("Entering append_states()\n");
 #endif
     for (i = 1; i < nshifts; i++)
     {

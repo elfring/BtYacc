@@ -15,30 +15,62 @@ extern char inc_file_name[];
 static void FileError(char const * fmt, ...) {
   va_list args;
 
-  fprintf(stderr, "%s:%d: ", (inc_file?inc_file_name:input_file_name), lineno);
+  if (fprintf(stderr, "%s:%d: ", (inc_file ? inc_file_name : input_file_name), lineno) < 0)
+  {
+     perror("FileError: fprintf");
+     abort();
+  }
+
   va_start(args, fmt);
-  vfprintf(stderr, fmt, args);
+
+  if (vfprintf(stderr, fmt, args) < 0)
+  {
+     perror("FileError: vfprintf");
+     va_end(args);
+     abort();
+  }
+
   va_end(args);
-  fprintf(stderr, "\n");
+
+  if (fprintf(stderr, "\n") < 0)
+  {
+     perror("FileError: fprintf");
+     abort();
+  }
 }
 
 void fatal(char const * msg)
 {
-    fprintf(stderr, "fatal - %s\n", msg);
+    if (fprintf(stderr, "fatal - %s\n", msg) < 0)
+    {
+       perror("fatal: fprintf");
+       abort();
+    }
+
     done(2);
 }
 
 
 void no_space()
 {
-    fprintf(stderr, "fatal - out of space\n");
+    if (fputs("fatal - out of space\n", stderr) == EOF)
+    {
+       perror("no_space: fputs");
+       abort();
+    }
+
     done(2);
 }
 
 
 void open_error(char const * filename)
 {
-    fprintf(stderr, "fatal - cannot open \"%s\"\n", filename);
+    if (fprintf(stderr, "fatal - cannot open \"%s\"\n", filename) < 0)
+    {
+       perror("open_error: fprintf");
+       abort();
+    }
+
     done(2);
 }
 
@@ -50,6 +82,16 @@ void unexpected_EOF()
 }
 
 
+static void BtYacc_putc(char c)
+{
+    if (putc(c, stderr) == EOF)
+    {
+       perror("BtYacc_putc");
+       abort();
+    }
+}
+
+
 void print_pos(char const * st_line, char const * st_cptr)
 {
     register char const * s;
@@ -58,20 +100,23 @@ void print_pos(char const * st_line, char const * st_cptr)
     for (s = st_line; *s != '\n'; ++s)
     {
 	if (isprint(*s) || *s == '\t')
-	    putc(*s, stderr);
+	   BtYacc_putc(*s);
 	else
-	    putc('?', stderr);
+	   BtYacc_putc('?');
     }
-    putc('\n', stderr);
+
+    BtYacc_putc('\n');
+
     for (s = st_line; s < st_cptr; ++s)
     {
 	if (*s == '\t')
-	    putc('\t', stderr);
+	   BtYacc_putc('\t');
 	else
-	    putc(' ', stderr);
+	   BtYacc_putc(' ');
     }
-    putc('^', stderr);
-    putc('\n', stderr);
+
+    BtYacc_putc('^');
+    BtYacc_putc('\n');
 }
 
 int read_errs = 0;
@@ -80,9 +125,34 @@ void error(int unsigned lineno, char const * line, char const * cptr, char const
 {
   char sbuf[512];
   va_list args;
-  
+
+  if (fprintf(stderr, "lineno: %u\n", lineno) < 0)
+  {
+     perror("error: fprintf");
+     abort();
+  }
+
+  if (line && (fprintf(stderr, "line: %s\n", line) < 0) )
+  {
+     perror("error: fprintf");
+     abort();
+  }
+
+  if (cptr && (fprintf(stderr, "cptr: %s\n", cptr) < 0) )
+  {
+     perror("error: fprintf");
+     abort();
+  }
+
   va_start(args, msg);
-  vsprintf(sbuf, msg, args);
+
+  if (vsprintf(sbuf, msg, args) < 0)
+  {
+     perror("error: vsprintf");
+     va_end(args);
+     abort();
+  }
+
   va_end(args);
   FileError("%s", sbuf);
   read_errs++;
@@ -210,5 +280,9 @@ void undefined_goal(char const * s) {
 }
 
 void undefined_symbol_warning(char const * s) {
-  fprintf(stderr, "warning - the symbol %s is undefined\n", s);
+  if (fprintf(stderr, "warning - the symbol %s is undefined\n", s) < 0)
+  {
+     perror("undefined_symbol_warning: fprintf");
+     abort();
+  }
 }

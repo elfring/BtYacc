@@ -21,15 +21,15 @@ LINKER	      = gcc
 
 MAKEFILE      = Makefile
 
-OBJS	      = closure.o error.o lalr.o lr0.o main.o mkpar.o output.o	\
-		mstring.o reader.o readskel.o skeleton.o symtab.o verbose.o warshall.o
+OBJS	      = closure.o error.o lalr.o log.o lr0.o main.o mkpar.o output.o	\
+		mstring.o reader.o readskel.o skeleton.o symtab.o verbose.o warshall.o write.o
 
 PRINT	      = pr -f -l88
 
 PROGRAM	      = btyacc
 
-SRCS	      = closure.c error.c lalr.c lr0.c main.c mkpar.c output.c	\
-		mstring.c reader.c readskel.c skeleton.c symtab.c verbose.c warshall.c
+SRCS	      = closure.c error.c lalr.c log.c lr0.c main.c mkpar.c output.c	\
+		mstring.c reader.c readskel.c skeleton.c symtab.c verbose.c warshall.c write.c
 
 OTHERS	      = README README.BYACC \
 		Makefile btyaccpa.ske push.skel empty.y skel2c manpage makefile.dos \
@@ -88,13 +88,15 @@ etags TAGS:
 closure.o: defs.h
 error.o: defs.h
 lalr.o: defs.h
-lr0.o: defs.h
-main.o: defs.h
-mkpar.o: defs.h
+log.o: log.h
+lr0.o: defs.h log.h
+main.o: defs.h log.h
+mkpar.o: defs.h log.h
 mstring.o: mstring.h
-output.o: defs.h
-reader.o: defs.h mstring.h
+output.o: defs.h write.h
+reader.o: defs.h mstring.h write.h
 skeleton.o: defs.h
 symtab.o: defs.h
 verbose.o: defs.h
 warshall.o: defs.h
+write.o: write.h

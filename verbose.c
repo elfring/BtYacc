@@ -1,8 +1,46 @@
 
 #include "defs.h"
+#include <stdarg.h>
 
 
 static Yshort *null_rules;
+
+static void BtYacc_puts(char const * text)
+{
+    if (fputs(text, verbose_file) == EOF)
+    {
+       perror("BtYacc_puts");
+       abort();
+    }
+}
+
+
+static void BtYacc_printf(char const * format, ...)
+{
+  va_list vl;
+
+  va_start(vl, format);
+
+  if (vfprintf(verbose_file, format, vl) < 0)
+  {
+     perror("BtYacc: vfprintf");
+     va_end(vl);
+     abort();
+  }
+
+  va_end(vl);
+}
+
+
+static void BtYacc_putc(char c)
+{
+    if (putc(c, verbose_file) == EOF)
+    {
+       perror("BtYacc_putc");
+       abort();
+    }
+}
+
 
 void verbose()
 {
@@ -12,7 +50,9 @@ void verbose()
 
     null_rules = (Yshort *) MALLOC(nrules*sizeof(Yshort));
     if (null_rules == 0) no_space();
-    fprintf(verbose_file, "\f\n");
+
+    BtYacc_puts("\f\n");
+
     for (i = 0; i < nstates; i++)
 	print_state(i);
     FREE(null_rules);
@@ -22,9 +62,8 @@ void verbose()
     if (SRtotal || RRtotal)
 	log_conflicts();
 
-    fprintf(verbose_file, "\n\n%d terminals, %d nonterminals\n", ntokens,
-	    nvars);
-    fprintf(verbose_file, "%d grammar rules, %d states\n", nrules - 2, nstates);
+    BtYacc_printf("\n\n%d terminals, %d nonterminals\n%d grammar rules, %d states\n",
+                  ntokens, nvars, nrules - 2, nstates);
 }
 
 
@@ -33,15 +72,18 @@ void log_unused()
     register int i;
     register Yshort *p;
 
-    fprintf(verbose_file, "\n\nRules never reduced:\n");
+    BtYacc_puts("\n\nRules never reduced:\n");
+
     for (i = 3; i < nrules; ++i)
     {
 	if (!rules_used[i])
 	{
-	    fprintf(verbose_file, "\t%s :", symbol_name[rlhs[i]]);
+	    BtYacc_printf("\t%s :", symbol_name[rlhs[i]]);
+
 	    for (p = ritem + rrhs[i]; *p >= 0; ++p)
-		fprintf(verbose_file, " %s", symbol_name[*p]);
-	    fprintf(verbose_file, "  (%d)\n", i - 2);
+		BtYacc_printf(" %s", symbol_name[*p]);
+
+	    BtYacc_printf("  (%d)\n", i - 2);
 	}
     }
 }
@@ -51,25 +93,28 @@ void log_conflicts()
 {
     register int i;
 
-    fprintf(verbose_file, "\n\n");
+    BtYacc_puts("\n\n");
+
     for (i = 0; i < nstates; i++)
     {
 	if (SRconflicts[i] || RRconflicts[i])
 	{
-	    fprintf(verbose_file, "State %d contains ", i);
+	    BtYacc_printf("State %d contains ", i);
+
 	    if (SRconflicts[i] == 1)
-		fprintf(verbose_file, "1 shift/reduce conflict");
+		BtYacc_puts("1 shift/reduce conflict");
 	    else if (SRconflicts[i] > 1)
-		fprintf(verbose_file, "%d shift/reduce conflicts",
-			SRconflicts[i]);
+		BtYacc_printf("%d shift/reduce conflicts", SRconflicts[i]);
+
 	    if (SRconflicts[i] && RRconflicts[i])
-		fprintf(verbose_file, ", ");
+		BtYacc_puts(", ");
+
 	    if (RRconflicts[i] == 1)
-		fprintf(verbose_file, "1 reduce/reduce conflict");
+		BtYacc_puts("1 reduce/reduce conflict");
 	    else if (RRconflicts[i] > 1)
-		fprintf(verbose_file, "%d reduce/reduce conflicts",
-			RRconflicts[i]);
-	    fprintf(verbose_file, ".\n");
+		BtYacc_printf("%d reduce/reduce conflicts", RRconflicts[i]);
+
+	    BtYacc_puts(".\n");
 	}
     }
 }
@@ -78,10 +123,12 @@ void log_conflicts()
 void print_state(int state)
 {
     if (state)
-	fprintf(verbose_file, "\n\n");
+	BtYacc_puts("\n\n");
+
     if (SRconflicts[state] || RRconflicts[state])
 	print_conflicts(state);
-    fprintf(verbose_file, "state %d\n", state);
+
+    BtYacc_printf("state %d\n", state);
     print_core(state);
     print_nulls(state);
     print_actions(state);
@@ -112,22 +159,20 @@ void print_conflicts(int state)
 	{
 	    if (state == final_state && symbol == 0)
 	    {
-		fprintf(verbose_file, "%d: shift/reduce conflict "
-			"(accept, reduce %d) on $end\n", state, p->number - 2);
+		BtYacc_printf("%d: shift/reduce conflict (accept, reduce %d) on $end\n",
+			state, p->number - 2);
 	    }
 	    else
 	    {
 		if (act == SHIFT)
 		{
-		    fprintf(verbose_file, "%d: shift/reduce conflict "
-			    "(shift %d, reduce %d) on %s\n", state, number,
-			    p->number - 2, symbol_name[symbol]);
+		    BtYacc_printf("%d: shift/reduce conflict (shift %d, reduce %d) on %s\n",
+			    state, number, p->number - 2, symbol_name[symbol]);
 		}
 		else
 		{
-		    fprintf(verbose_file, "%d: reduce/reduce conflict "
-			    "(reduce %d, reduce %d) on %s\n", state,
-			    number - 2, p->number - 2, symbol_name[symbol]);
+		    BtYacc_printf("%d: reduce/reduce conflict (reduce %d, reduce %d) on %s\n",
+			    state, number - 2, p->number - 2, symbol_name[symbol]);
 		}
 	    }
 	}
@@ -153,19 +198,20 @@ void print_core(int state)
 
 	while (*sp >= 0) ++sp;
 	rule = -(*sp);
-	fprintf(verbose_file, "\t%s : ", symbol_name[rlhs[rule]]);
+	BtYacc_printf("\t%s : ", symbol_name[rlhs[rule]]);
 
         for (sp = ritem + rrhs[rule]; sp < sp1; sp++)
-	    fprintf(verbose_file, "%s ", symbol_name[*sp]);
+	    BtYacc_printf("%s ", symbol_name[*sp]);
 
-	putc('.', verbose_file);
+	BtYacc_putc('.');
 
 	while (*sp >= 0)
 	{
-	    fprintf(verbose_file, " %s", symbol_name[*sp]);
+	    BtYacc_printf(" %s", symbol_name[*sp]);
 	    sp++;
 	}
-	fprintf(verbose_file, "  (%d)\n", -2 - *sp);
+
+	BtYacc_printf("  (%d)\n", -2 - *sp);
     }
 }
 
@@ -206,10 +252,11 @@ void print_nulls(int state)
     for (i = 0; i < nnulls; ++i)
     {
 	j = null_rules[i];
-	fprintf(verbose_file, "\t%s : .  (%d)\n", symbol_name[rlhs[j]],
+	BtYacc_printf("\t%s : .  (%d)\n", symbol_name[rlhs[j]],
 		j - 2);
     }
-    fprintf(verbose_file, "\n");
+
+    BtYacc_puts("\n");
 }
 
 
@@ -220,7 +267,7 @@ void print_actions(int stateno)
     register int as;
 
     if (stateno == final_state)
-	fprintf(verbose_file, "\t$end  accept\n");
+	BtYacc_puts("\t$end  accept\n");
 
     p = parser[stateno];
     if (p)
@@ -256,7 +303,7 @@ void print_shifts(action const * p)
 	for (; p; p = p->next)
 	{
 	    if (p->action_code == SHIFT && p->suppressed == 0)
-		fprintf(verbose_file, "\t%s  shift %d\n",
+		BtYacc_printf("\t%s  shift %d\n",
 			    symbol_name[p->symbol], p->number);
 	}
     }
@@ -279,7 +326,7 @@ void print_reductions(action const * p, int defred)
     }
 
     if (anyreds == 0)
-	fprintf(verbose_file, "\t.  error\n");
+	BtYacc_puts("\t.  error\n");
     else
     {
 	for (; p; p = p->next)
@@ -288,13 +335,13 @@ void print_reductions(action const * p, int defred)
 	    {
 		k = p->number - 2;
 		if (p->suppressed == 0)
-		    fprintf(verbose_file, "\t%s  reduce %d\n",
+		    BtYacc_printf("\t%s  reduce %d\n",
 			    symbol_name[p->symbol], k);
 	    }
 	}
 
         if (defred > 0)
-	    fprintf(verbose_file, "\t.  reduce %d\n", defred - 2);
+	    BtYacc_printf("\t.  reduce %d\n", defred - 2);
     }
 }
 
@@ -306,7 +353,7 @@ void print_gotos(int stateno)
     register Yshort *to_state;
     register shifts *sp;
 
-    putc('\n', verbose_file);
+    BtYacc_putc('\n');
     sp = shift_table[stateno];
     to_state = sp->shift;
     for (i = 0; i < sp->nshifts; ++i)
@@ -314,7 +361,7 @@ void print_gotos(int stateno)
 	k = to_state[i];
 	as = accessing_symbol[k];
 	if (ISVAR(as))
-	    fprintf(verbose_file, "\t%s  goto %d\n", symbol_name[as], k);
+	    BtYacc_printf("\t%s  goto %d\n", symbol_name[as], k);
     }
 }
 

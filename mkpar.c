@@ -1,5 +1,6 @@
 
 #include "defs.h"
+#include "log.h"
 
 action **parser;
 int SRtotal;
@@ -57,9 +58,9 @@ static void unused_rules(void)
     if (nunused)
 	{
 	if (nunused == 1)
-	    fprintf(stderr, "%s: 1 rule never reduced\n", myname);
+	    BtYacc_logf("%s: 1 rule never reduced\n", myname);
 	else
-	    fprintf(stderr, "%s: %d rules never reduced\n", myname, nunused);
+	    BtYacc_logf("%s: %d rules never reduced\n", myname, nunused);
 	}
 }
 
@@ -120,21 +121,22 @@ static void remove_conflicts(void)
 
 static void total_conflicts(void)
 {
-    fprintf(stderr, "%s: ", myname);
+    BtYacc_logf("%s: ", myname);
+
     if (SRtotal == 1)
-	fprintf(stderr, "1 shift/reduce conflict");
+	BtYacc_logs("1 shift/reduce conflict");
     else if (SRtotal > 1)
-	fprintf(stderr, "%d shift/reduce conflicts", SRtotal);
+	BtYacc_logf("%d shift/reduce conflicts", SRtotal);
 
     if (SRtotal && RRtotal)
-	fprintf(stderr, ", ");
+	BtYacc_logs(", ");
 
     if (RRtotal == 1)
-	fprintf(stderr, "1 reduce/reduce conflict");
+	BtYacc_logs("1 reduce/reduce conflict");
     else if (RRtotal > 1)
-	fprintf(stderr, "%d reduce/reduce conflicts", RRtotal);
+	BtYacc_logf("%d reduce/reduce conflicts", RRtotal);
 
-    fprintf(stderr, ".\n");
+    BtYacc_logs(".\n");
 }
 
 static void defreds(void)

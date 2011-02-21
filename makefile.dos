@@ -20,15 +20,15 @@ CC        = bcc
 
 MAKEFILE      = Makefile.dos
 
-OBJS1  = closure.obj error.obj lalr.obj lr0.obj main.obj mkpar.obj output.obj
-OBJS2  = mstring.obj reader.obj skeleton.obj symtab.obj verbose.obj warshall.obj
+OBJS1  = closure.obj error.obj lalr.obj log.obj lr0.obj main.obj mkpar.obj output.obj
+OBJS2  = mstring.obj reader.obj skeleton.obj symtab.obj verbose.obj warshall.obj write.obj
 OBJS   = $(OBJS1) $(OBJS2)
 
 
 PROGRAM       = btyacc.exe
 
-SRCS          = closure.c error.c lalr.c lr0.c main.c mkpar.c output.c  \
-                mstring.c reader.c skeleton.c symtab.c verbose.c warshall.c
+SRCS          = closure.c error.c lalr.c log.c lr0.c main.c mkpar.c output.c  \
+                mstring.c reader.c skeleton.c symtab.c verbose.c warshall.c write.c
 
 OTHERS        = README README.BYACC \
                 Makefile btyaccpa.ske empty.y skel2c manpage
@@ -56,16 +56,18 @@ skeleton.c: btyaccpa.ske
         awk -f skel2c btyaccpa.ske >skeleton.c
 
 ###
-closure.o: defs.h
-error.o: defs.h
-lalr.o: defs.h
-lr0.o: defs.h
-main.o: defs.h
-mkpar.o: defs.h
-mstring.o: mstring.h
-output.o: defs.h
-reader.o: defs.h mstring.h
-skeleton.o: defs.h
-symtab.o: defs.h
-verbose.o: defs.h
-warshall.o: defs.h
+closure.obj: defs.h
+error.obj: defs.h
+lalr.obj: defs.h
+log.obj: log.h
+lr0.obj: defs.h log.h
+main.obj: defs.h log.h
+mkpar.obj: defs.h log.h
+mstring.obj: mstring.h
+output.obj: defs.h write.h
+reader.obj: defs.h mstring.h write.h
+skeleton.obj: defs.h
+symtab.obj: defs.h
+verbose.obj: defs.h
+warshall.obj: defs.h
+write.obj: write.h
