@@ -357,7 +357,15 @@ void lr0(void);
 
 /* main.c */
 void done(int);
-void onintr(void);
+
+#if defined(SIGINT) || defined(SIGTERM) || defined(SIGHUP)
+#define BTYACC_USE_SIGNAL_HANDLING
+void BtYacc_stop_test(void);
+#define BTYACC_INTERRUPTION_CHECK BtYacc_stop_test();
+#else
+#define BTYACC_INTERRUPTION_CHECK
+#endif
+
 char *allocate(unsigned);
 int main(int, char **);
 
