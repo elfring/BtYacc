@@ -107,7 +107,7 @@ static void set_maxrhs(void)
 
 static void initialize_LA(void)
 {
-  register int i, j, k;
+  register size_t i, j, k;
   register reductions *rp;
 
   lookaheads = NEW2(nstates + 1, Yshort);
@@ -145,9 +145,9 @@ static void initialize_LA(void)
 static void set_goto_map(void)
 {
   register shifts *sp;
-  register int i;
+  register size_t i;
   register int symbol;
-  register int k;
+  register size_t k;
   register Yshort *temp_map;
   register int state2;
   register int state1;
@@ -241,7 +241,7 @@ static void traverse(int i)
   register unsigned *fp1;
   register unsigned *fp2;
   register unsigned *fp3;
-  register int j;
+  register size_t j;
   register Yshort *rp;
 
   int height;
@@ -294,7 +294,7 @@ static void traverse(int i)
 
 static void digraph(Yshort** relation)
 {
-  register int i;
+  register size_t i;
 
   infinity = ngotos + 2;
   INDEX = NEW2(ngotos + 1, Yshort);
@@ -319,8 +319,8 @@ static void digraph(Yshort** relation)
 
 static void initialize_F(void)
 {
-  register int i;
-  register int j;
+  register size_t i;
+  register size_t j;
   register int k;
   register shifts *sp;
   register Yshort *edge;
@@ -394,7 +394,7 @@ static void initialize_F(void)
 
 static void add_lookback_edge(int stateno, int ruleno, int gotono)
 {
-    register int i, k;
+    register size_t i, k;
     register int found;
     register shorts *sp;
 
@@ -423,8 +423,8 @@ static Yshort** transpose(Yshort** R, int n)
   register Yshort **temp_R;
   register Yshort *nedges;
   register Yshort *sp;
-  register int i;
-  register int k;
+  register size_t i;
+  register size_t k;
 
   nedges = NEW2(n, Yshort);
 
@@ -473,8 +473,8 @@ static Yshort** transpose(Yshort** R, int n)
 
 static void build_relations(void)
 {
-  register int i;
-  register int j;
+  register size_t i;
+  register size_t j;
   register int k;
   register Yshort *rulep;
   register Yshort *rp;
@@ -572,7 +572,7 @@ static void compute_FOLLOWS(void)
 
 static void compute_lookaheads(void)
 {
-  register int i, n;
+  register size_t i, n;
   register unsigned *fp1, *fp2, *fp3;
   register shorts *sp, *next;
   register unsigned *rowp;

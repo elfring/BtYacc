@@ -79,7 +79,7 @@ bucket* lookup(char const * name)
 
 void create_symbol_table()
 {
-    register int i;
+    register size_t i;
     register bucket *bp;
 
     symbol_table = (bucket **) MALLOC(TABLE_SIZE*sizeof(bucket *));

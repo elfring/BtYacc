@@ -15,7 +15,7 @@ extern char inc_file_name[];
 static void FileError(char const * fmt, ...) {
   va_list args;
 
-  if (fprintf(stderr, "%s:%d: ", (inc_file ? inc_file_name : input_file_name), lineno) < 0)
+  if (fprintf(stderr, "%s:%u: ", (inc_file ? inc_file_name : input_file_name), lineno) < 0)
   {
      perror("FileError: fprintf");
      abort();
@@ -119,7 +119,7 @@ void print_pos(char const * st_line, char const * st_cptr)
     BtYacc_putc('\n');
 }
 
-int read_errs = 0;
+int unsigned read_errs = 0;
 
 void error(int unsigned lineno, char const * line, char const * cptr, char const * msg, ...)
 {
@@ -248,8 +248,8 @@ void bad_formals() {
   error(lineno, 0, 0, "bad formal argument list"); 
 }
 
-void dollar_warning(int a_lineno, int i) {
-  int slineno = lineno;
+void dollar_warning(int unsigned a_lineno, int i) {
+  int unsigned slineno = lineno;
   lineno = a_lineno;
   FileError("$%d references beyond the end of the current rule", i);
   lineno = slineno;

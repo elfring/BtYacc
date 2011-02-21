@@ -25,7 +25,7 @@ int linesize;
 
 FILE *inc_file = NULL;
 char  inc_file_name[LINESIZE];
-int   inc_save_lineno;
+int unsigned inc_save_lineno;
 
 int in_ifdef = 0;
 int ifdef_skip;
@@ -66,7 +66,7 @@ char *get_line() {
   extern int Eflag;
   FILE *f;
   int c;
-  int i;
+  size_t i;
 
   /* VM: input from main or include file */
  NextLine:;
@@ -112,7 +112,7 @@ char *get_line() {
   /* VM: process %ifdef line */
   if(strncmp(&line[0], "%ifdef ", 7)==0) {
     char var_name[80];
-    int ii=0;
+    size_t ii = 0;
     char **ps;
     for(i=7; line[i]!='\n' && line[i]!=' '; i++, ii++) {
       var_name[ii] = line[i];
@@ -152,7 +152,7 @@ char *get_line() {
 
   /* VM: Process %include line */
   if(strncmp(&line[0], "%include ", 9)==0) {
-    int ii=0;
+    size_t ii = 0;
     for(i=9; line[i]!='\n' && line[i]!=' '; i++, ii++) {
       inc_file_name[ii] = line[i];
     }
@@ -172,7 +172,7 @@ char *get_line() {
   /* VM: process %define line */
   if(strncmp(&line[0], "%define ", 8)==0) {
     char var_name[80];
-    int ii=0;
+    size_t ii = 0;
     char **ps;
     for(i=8; line[i]!='\n' && line[i]!=' '; i++, ii++) {
       var_name[ii] = line[i];
@@ -219,7 +219,7 @@ char *skip_comment()
 {
     register char *s;
 
-    int st_lineno = lineno;
+    int unsigned st_lineno = lineno;
     char *st_line = dup_line();
     char *st_cptr = st_line + (cptr - line);
 
@@ -355,7 +355,7 @@ void copy_ident()
 void copy_string(int quote, FILE *f1, FILE *f2)
 {
 register int	c;
-int		s_lineno = lineno;
+int unsigned	s_lineno = lineno;
 char		*s_line = dup_line();
 char		*s_cptr = s_line + (cptr - line - 1);
 
@@ -385,7 +385,7 @@ register int	c;
 		OUTC(' '); }
 	OUTC('*'); OUTC('/'); }
     else if (c == '*') {
-	int c_lineno = lineno;
+	int unsigned c_lineno = lineno;
 	char *c_line = dup_line();
 	char *c_cptr = c_line + (cptr - line - 1);
 	OUTC(c);
@@ -407,7 +407,7 @@ void copy_text()
     register int c;
     register FILE *f = text_file;
     int need_newline = 0;
-    int t_lineno = lineno;
+    int unsigned t_lineno = lineno;
     char *t_line = dup_line();
     char *t_cptr = t_line + (cptr - line - 2);
 
@@ -455,7 +455,7 @@ void copy_union()
     FILE *dc_file;
     register int c;
     int depth;
-    int u_lineno = lineno;
+    int unsigned u_lineno = lineno;
     char *u_line = dup_line();
     char *u_cptr = u_line + (cptr - line - 6);
 
@@ -515,11 +515,11 @@ int hexval(int c)
 bucket *get_literal()
 {
     register int c, quote;
-    register int i;
+    register size_t i;
     register int n;
     register char *s;
     register bucket *bp;
-    int s_lineno = lineno;
+    int unsigned s_lineno = lineno;
     char *s_line = dup_line();
     char *s_cptr = s_line + (cptr - line);
 
@@ -706,9 +706,9 @@ int get_number()
 //  
 // b: A {$$=$1;}
 // 
-static char *cache_tag(char *tag, int len)
+static char* cache_tag(char* tag, size_t len)
 {
-int	i;
+size_t	i;
 char	*s;
 
     for (i = 0; i < ntags; ++i) {
@@ -732,7 +732,7 @@ char	*s;
 char *get_tag()
 {
     register int c;
-    int t_lineno = lineno;
+    int unsigned t_lineno = lineno;
     char *t_line = dup_line();
     char *t_cptr = t_line + (cptr - line);
 
@@ -975,14 +975,14 @@ void expand_rules()
 
 /* set in copy_args and incremented by the various routines that will rescan
 ** the argument list as appropriate */
-static int rescan_lineno;
+static int unsigned rescan_lineno;
 
 static char *copy_args(int *alen)
 {
 struct mstring	*s = msnew();
 int		depth = 0, len = 1, c;
 char		quote = 0;
-int		a_lineno = lineno;
+int unsigned	a_lineno = lineno;
 char		*a_line = dup_line();
 char		*a_cptr = a_line + (cptr - line - 1);
 
@@ -1045,7 +1045,7 @@ int	neg=0, val=0;
 static void parse_arginfo(bucket *a, char *args, int argslen)
 {
 char	*p=args, *tmp;
-int	i, redec=0;
+size_t	i, redec = 0;
 
     if (a->args >= 0) {
 	if (a->args != argslen)
@@ -1086,7 +1086,7 @@ static char *compile_arg(char **theptr, char *yyvaltag)
 {
 char		*p = *theptr;
 struct mstring	*c = msnew();
-int		i, j, n;
+size_t		i, j, n;
 Yshort		*offsets=0, maxoffset;
 bucket		**rhs;
 
@@ -1177,7 +1177,7 @@ struct arg_cache	*entry;
 static void insert_arg_cache(char *code, int rule)
 {
 struct arg_cache	*entry = NEW(struct arg_cache);
-int			i;
+size_t			i;
 
     if (!entry) no_space();
     i = strnshash(code) % ARG_CACHE_SIZE;
@@ -1190,7 +1190,7 @@ int			i;
 static void clean_arg_cache(void)
 {
 struct arg_cache	*e, *t;
-int			i;
+size_t			i;
 
     for (i=0; i<ARG_CACHE_SIZE; i++) {
 	for (e=arg_cache[i]; (t=e); e=e->next, FREE(t))
@@ -1203,7 +1203,7 @@ void advance_to_start()
     register int c;
     register bucket *bp;
     char *s_cptr;
-    int s_lineno;
+    int unsigned s_lineno;
     char	*args = 0;
     int		argslen = 0;
 
@@ -1261,7 +1261,7 @@ void start_rule(bucket *bp, int s_lineno)
 
 void end_rule()
 {
-    register int i;
+    register size_t i;
 
     if (!last_was_action && plhs[nrules]->tag) {
 	for (i = nitems - 1; pitem[i]; --i) continue;
@@ -1306,7 +1306,7 @@ void insert_empty_rule()
 
 static char *insert_arg_rule(char *arg, char *tag)
 {
-int	lineno = rescan_lineno;
+int unsigned lineno = rescan_lineno;
 char	*code = compile_arg(&arg, tag);
 int	rule = lookup_arg_cache(code);
 FILE	*f = action_file;
@@ -1335,7 +1335,7 @@ void add_symbol()
 {
     register int c;
     register bucket *bp;
-    int s_lineno = lineno;
+    int unsigned s_lineno = lineno;
     char *args = 0;
     int argslen = 0;
 
@@ -1365,7 +1365,7 @@ void add_symbol()
     if (bp->args < 0)
 	bp->args = argslen;
     if (argslen == 0 && bp->args > 0 && pitem[nitems-1] == 0) {
-	int	i;
+	size_t i;
 	if (plhs[nrules]->args != bp->args)
 	    error(lineno, line, cptr, "Wrong number of default arguments "
 		  "for %s", bp->name);
@@ -1378,7 +1378,7 @@ void add_symbol()
 				  bp->name);
     if (args != 0) {
 	char	*ap;
-	int	i;
+	size_t	i;
 	for (ap=args, i=0; i<argslen; i++)
 	    ap = insert_arg_rule(ap, bp->argtags[i]);
 	free(args); }
@@ -1391,13 +1391,13 @@ void add_symbol()
 void copy_action()
 {
     register int c;
-    register int i, j, n;
+    register size_t i, j, n;
     int depth;
     int trialaction = 0;
     int haveyyval = 0;
     char *tag;
     register FILE *f = action_file;
-    int a_lineno = lineno;
+    int unsigned a_lineno = lineno;
     char *a_line = dup_line();
     char *a_cptr = a_line + (cptr - line);
     Yshort *offsets=0, maxoffset;
@@ -1407,7 +1407,7 @@ void copy_action()
 	insert_empty_rule();
     last_was_action = 1;
 
-    BtYacc_printf(f, "case %d:\n", nrules - 2);
+    BtYacc_printf(f, "case %u:\n", nrules - 2);
 
     if (*cptr != '[')
 	BtYacc_puts("  if (!yytrial)\n", f);
@@ -1437,7 +1437,7 @@ loop:
     c = *cptr;
     if (c == '$') {
 	if (cptr[1] == '<') {
-	    int d_lineno = lineno;
+	    int unsigned d_lineno = lineno;
 	    char *d_line = dup_line();
 	    char *d_cptr = d_line + (cptr - line);
 
@@ -1701,7 +1701,7 @@ void read_grammar()
 
 void free_tags()
 {
-    register int i;
+    register size_t i;
 
     if (tag_table == 0) return;
 
@@ -1749,7 +1749,7 @@ void pack_symbols()
 {
     register bucket *bp;
     register bucket **v;
-    register int i, j, k, n;
+    register size_t i, j, k, n;
 
     nsyms = 2;
     ntokens = 1;
@@ -1842,7 +1842,7 @@ void pack_symbols()
 
 void pack_grammar()
 {
-    register int i, j;
+    register size_t i, j;
     int assoc, prec;
 
     ritem = NEW2(nitems, Yshort);
@@ -1902,7 +1902,7 @@ void pack_grammar()
 
 void print_grammar()
 {
-    register int i, j, k;
+    register size_t i, j, k;
     int spacing = 0;
     register FILE *f = verbose_file;
 

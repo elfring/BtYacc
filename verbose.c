@@ -44,7 +44,7 @@ static void BtYacc_putc(char c)
 
 void verbose()
 {
-    register int i;
+    register int unsigned i;
 
     if (!vflag) return;
 
@@ -62,14 +62,14 @@ void verbose()
     if (SRtotal || RRtotal)
 	log_conflicts();
 
-    BtYacc_printf("\n\n%d terminals, %d nonterminals\n%d grammar rules, %d states\n",
+    BtYacc_printf("\n\n%u terminals, %u nonterminals\n%u grammar rules, %u states\n",
                   ntokens, nvars, nrules - 2, nstates);
 }
 
 
 void log_unused()
 {
-    register int i;
+    register size_t i;
     register Yshort *p;
 
     BtYacc_puts("\n\nRules never reduced:\n");
@@ -91,7 +91,7 @@ void log_unused()
 
 void log_conflicts()
 {
-    register int i;
+    register size_t i;
 
     BtYacc_puts("\n\n");
 
@@ -120,7 +120,7 @@ void log_conflicts()
 }
 
 
-void print_state(int state)
+void print_state(int unsigned state)
 {
     if (state)
 	BtYacc_puts("\n\n");
@@ -135,7 +135,7 @@ void print_state(int state)
 }
 
 
-void print_conflicts(int state)
+void print_conflicts(int unsigned state)
 {
     register int symbol, act, number;
     register action *p;
@@ -180,11 +180,11 @@ void print_conflicts(int state)
 }
 
 
-void print_core(int state)
+void print_core(int unsigned state)
 {
-    register int i;
+    register size_t i;
     register int k;
-    register int rule;
+    register size_t rule;
     register core *statep;
     register Yshort *sp;
     register Yshort *sp1;
@@ -216,10 +216,10 @@ void print_core(int state)
 }
 
 
-void print_nulls(int state)
+void print_nulls(int unsigned state)
 {
     register action *p;
-    register int i, j, k, nnulls;
+    register size_t i, j, k, nnulls;
 
     nnulls = 0;
     for (p = parser[state]; p; p = p->next)
@@ -260,7 +260,7 @@ void print_nulls(int state)
 }
 
 
-void print_actions(int stateno)
+void print_actions(int unsigned stateno)
 {
     register action *p;
     register shifts *sp;
@@ -348,7 +348,7 @@ void print_reductions(action const * p, int defred)
 
 void print_gotos(int stateno)
 {
-    register int i, k;
+    register size_t i, k;
     register int as;
     register Yshort *to_state;
     register shifts *sp;

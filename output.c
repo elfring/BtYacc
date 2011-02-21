@@ -43,8 +43,8 @@ void output()
 
 void output_rule_data()
 {
-    register int i;
-    register int j;
+    register size_t i;
+    register size_t j;
 
     if (!rflag)
 	BtYacc_puts("static ", output_file);
@@ -99,7 +99,7 @@ void output_rule_data()
 
 void output_yydefred()
 {
-    register int i, j;
+    register size_t i, j;
 
     if (!rflag)
 	BtYacc_puts("static ", output_file);
@@ -130,7 +130,7 @@ void output_yydefred()
 
 static int find_conflict_base(int cbase)
 {
-    int i,j;
+    size_t i,j;
 
     for (i=0; i<cbase; i++) {
 	for (j=0; j+cbase < nconflicts; j++) {
@@ -143,7 +143,7 @@ static int find_conflict_base(int cbase)
 
 static void token_actions(void)
 {
-    register int i, j;
+    register size_t i, j;
     register int shiftcount, reducecount, conflictcount, csym, cbase;
     register int max, min;
     register Yshort *actionrow, *r, *s;
@@ -254,14 +254,14 @@ static void token_actions(void)
 
 static void save_column(int symbol, int default_state)
 {
-    register int i;
+    register size_t i;
     register int m;
     register int n;
     register Yshort *sp;
     register Yshort *sp1;
     register Yshort *sp2;
     register int count;
-    register int symno;
+    register size_t symno;
 
     m = goto_map[symbol];
     n = goto_map[symbol + 1];
@@ -294,7 +294,7 @@ static void save_column(int symbol, int default_state)
 
 static void pack_table(void)
 {
-    register int i;
+    register size_t i;
     register int place;
     register int state;
 
@@ -339,7 +339,7 @@ static void pack_table(void)
 
 static int default_goto(int symbol)
 {
-    register int i;
+    register size_t i;
     register int m;
     register int n;
     register int default_state;
@@ -409,9 +409,9 @@ static void goto_actions(void)
 
 static void sort_actions(void)
 {
-  register int i;
-  register int j;
-  register int k;
+  register size_t i;
+  register size_t j;
+  register size_t k;
   register int t;
   register int w;
 
@@ -493,15 +493,15 @@ void output_actions()
 /*  Not really any point in checking for matching conflicts -- it is    */
 /*  extremely unlikely to occur, and conflicts are (hopefully) rare.    */
 
-int matching_vector(int vector)
+int matching_vector(size_t vector)
 {
-    register int i;
-    register int j;
-    register int k;
+    register size_t i;
+    register size_t j;
+    register size_t k;
     register int t;
     register int w;
     register int match;
-    register int prev;
+    register size_t prev;
 
     i = order[vector];
     if (i >= 2*nstates)
@@ -532,9 +532,10 @@ int matching_vector(int vector)
 
 
 
-int pack_vector(int vector)
+int pack_vector(size_t vector)
 {
-    register int i, j, k, l;
+    register size_t i;
+    register int j, k;
     register int t;
     register int loc;
     register int ok;
@@ -563,6 +564,8 @@ int pack_vector(int vector)
 	    loc = j + from[k];
 	    if (loc >= maxtable)
 	    {
+		register size_t l;
+
 		if (loc >= MAXTABLE)
 		    fatal("maximum table size exceeded");
 
@@ -610,7 +613,7 @@ int pack_vector(int vector)
 
 void output_base()
 {
-    register int i, j;
+    register size_t i, j;
 
     if (!rflag)
 	BtYacc_puts("static ", output_file);
@@ -699,8 +702,8 @@ void output_base()
 
 void output_table()
 {
-    register int i;
-    register int j;
+    register size_t i;
+    register size_t j;
 
     ++outline;
 
@@ -744,8 +747,8 @@ void output_table()
 
 void output_check()
 {
-    register int i;
-    register int j;
+    register size_t i;
+    register size_t j;
 
     if (!rflag)
 	BtYacc_puts("static ", output_file);
@@ -776,8 +779,8 @@ void output_check()
 
 void output_ctable()
 {
-    register int i;
-    register int j;
+    register size_t i;
+    register size_t j;
 
     if (!rflag)
 	BtYacc_puts("static ", output_file);
@@ -840,7 +843,7 @@ int is_C_identifier(char const * name)
 
 void output_defines()
 {
-    register int c, i;
+    register size_t i;
     register char *s;
     FILE *dc_file;
 
@@ -857,6 +860,8 @@ void output_defines()
 	s = symbol_name[i];
 	if (is_C_identifier(s))
 	{
+	    register char c;
+
 	    BtYacc_puts("#define ", dc_file);
 	    c = *s;
 	    if (c == '"')
@@ -884,6 +889,8 @@ void output_defines()
 
     if (dflag && unionized)
     {
+	register char c;
+
 	if (fclose(union_file))
         {
            perror("output_defines: fclose");
@@ -948,7 +955,7 @@ void output_stored_text()
 
 void output_debug()
 {
-    register int i, j, k, max;
+    register size_t i, j, k, max;
     char **symnam, *s;
 
     ++outline;
@@ -1358,7 +1365,7 @@ void write_section(char const * section_name)
 {
     char const * const * section;
     FILE *fp;
-    int i;
+    size_t i;
     struct section *sl;
 
     for(sl=&section_list[0]; sl->name; sl++) {
