@@ -8,7 +8,95 @@ static unsigned *first_derives;
 static unsigned *EFF;
 
 
-void set_EFF()
+void finalize_closure()
+{
+  FREE(itemset);
+  FREE(ruleset);
+  FREE(first_derives + ntokens * WORDSIZE(nrules));
+}
+
+
+#ifdef	DEBUG
+
+static void print_closure(int n)
+{
+  register Yshort *isp;
+
+  printf("\n\nn = %d\n\n", n);
+  for (isp = itemset; isp < itemsetend; isp++)
+    printf("   %d\n", *isp);
+}
+
+
+static void print_EFF(void)
+{
+    register int i, j;
+    register unsigned *rowp;
+    register unsigned word;
+    register unsigned mask;
+
+    printf("\n\nEpsilon Free Firsts\n");
+
+    for (i = start_symbol; i < nsyms; i++)
+    {
+	printf("\n%s", symbol_name[i]);
+	rowp = EFF + ((i - start_symbol) * WORDSIZE(nvars));
+	word = *rowp++;
+
+	mask = 1;
+	for (j = 0; j < nvars; j++)
+	{
+	    if (word & mask)
+		printf("  %s", symbol_name[start_symbol + j]);
+
+	    mask <<= 1;
+	    if (mask == 0)
+	    {
+		word = *rowp++;
+		mask = 1;
+	    }
+	}
+    }
+}
+
+
+static void print_first_derives(void)
+{
+  register int i;
+  register int j;
+  register unsigned *rp;
+  register unsigned cword;
+  register unsigned mask;
+
+  printf("\n\n\nFirst Derives\n");
+
+  for (i = start_symbol; i < nsyms; i++)
+    {
+      printf("\n%s derives\n", symbol_name[i]);
+      rp = first_derives + i * WORDSIZE(nrules);
+      cword = *rp++;
+      mask = 1;
+      for (j = 0; j <= nrules; j++)
+        {
+	  if (cword & mask)
+	    printf("   %d\n", j);
+
+	  mask <<= 1;
+	  if (mask == 0)
+	    {
+	      cword = *rp++;
+	      mask = 1;
+	    }
+	}
+    }
+
+  fflush(stdout);
+}
+
+#endif
+
+
+static void set_EFF(void)
 {
     register unsigned *row;
     register int symbol;
@@ -101,7 +189,7 @@ void set_first_derives()
 }
 
 
-void closure(Yshort *nucleus, int n)
+void closure(Yshort* nucleus, int n)
 {
     register int ruleno;
     register unsigned word;
@@ -172,91 +260,3 @@ void closure(Yshort *nucleus, int n)
 #endif
 }
 
-
-
-void finalize_closure()
-{
-  FREE(itemset);
-  FREE(ruleset);
-  FREE(first_derives + ntokens * WORDSIZE(nrules));
-}
-
-
-#ifdef	DEBUG
-
-void print_closure(int n)
-{
-  register Yshort *isp;
-
-  printf("\n\nn = %d\n\n", n);
-  for (isp = itemset; isp < itemsetend; isp++)
-    printf("   %d\n", *isp);
-}
-
-
-void print_EFF()
-{
-    register int i, j;
-    register unsigned *rowp;
-    register unsigned word;
-    register unsigned mask;
-
-    printf("\n\nEpsilon Free Firsts\n");
-
-    for (i = start_symbol; i < nsyms; i++)
-    {
-	printf("\n%s", symbol_name[i]);
-	rowp = EFF + ((i - start_symbol) * WORDSIZE(nvars));
-	word = *rowp++;
-
-	mask = 1;
-	for (j = 0; j < nvars; j++)
-	{
-	    if (word & mask)
-		printf("  %s", symbol_name[start_symbol + j]);
-
-	    mask <<= 1;
-	    if (mask == 0)
-	    {
-		word = *rowp++;
-		mask = 1;
-	    }
-	}
-    }
-}
-
-
-void print_first_derives()
-{
-  register int i;
-  register int j;
-  register unsigned *rp;
-  register unsigned cword;
-  register unsigned mask;
-
-  printf("\n\n\nFirst Derives\n");
-
-  for (i = start_symbol; i < nsyms; i++)
-    {
-      printf("\n%s derives\n", symbol_name[i]);
-      rp = first_derives + i * WORDSIZE(nrules);
-      cword = *rp++;
-      mask = 1;
-      for (j = 0; j <= nrules; j++)
-        {
-	  if (cword & mask)
-	    printf("   %d\n", j);
-
-	  mask <<= 1;
-	  if (mask == 0)
-	    {
-	      cword = *rp++;
-	      mask = 1;
-	    }
-	}
-    }
-
-  fflush(stdout);
-}
-
-#endif

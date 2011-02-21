@@ -297,18 +297,14 @@ extern Yshort nunused;
 extern Yshort final_state;
 
 /* system variable */
-extern int errno;
+#include <errno.h>
 
 /* global functions */
 
 /* closure.c */
-void set_EFF(void);
 void set_first_derives(void);
 void closure(Yshort *, int);
 void finalize_closure(void);
-void print_closure(int);
-void print_EFF(void);
-void print_first_derives(void);
 
 /* error.c */
 void fatal(char *);
@@ -349,55 +345,20 @@ void undefined_symbol_warning(char *);
 
 /* lalr.c */
 void lalr(void);
-void set_state_table(void);
-void set_accessing_symbol(void);
-void set_shift_table(void);
-void set_reduction_table(void);
-void set_maxrhs(void);
-void initialize_LA(void);
-void set_goto_map(void);
-int map_goto(int, int);
-void initialize_F(void);
-void build_relations(void);
-void add_lookback_edge(int, int, int);
-Yshort **transpose(Yshort **, int);
-void compute_FOLLOWS(void);
-void compute_lookaheads(void);
-void digraph(Yshort **);
-void traverse(int);
 
 /* lr0.c */
-void allocate_itemsets(void);
-void allocate_storage(void);
-void append_states(void);
-void free_storage(void);
-void generate_states(void);
-int get_state(int);
-void initialize_states(void);
-void new_itemsets(void);
-core *new_state(int);
 void show_cores(void);
 void show_ritems(void);
 void show_rrhs(void);
 void show_shifts(void);
-void save_shifts(void);
-void save_reductions(void);
-void set_derives(void);
 void free_derives(void);
-void print_derives(void);
-void set_nullable(void);
 void free_nullable(void);
 void lr0(void);
 
 /* main.c */
 void done(int);
 void onintr(void);
-void set_signals(void);
-void usage(void);
-void getargs(int, char **);
 char *allocate(unsigned);
-void create_file_names(void);
-void open_files(void);
 int main(int, char **);
 
 /* mkpar.c */
@@ -406,12 +367,7 @@ action *parse_actions(int);
 action *get_shifts(int);
 action *add_reductions(int, action *);
 action *add_reduce(action *, int, int);
-void find_final_state(void);
-void unused_rules(void);
-void remove_conflicts(void);
-void total_conflicts(void);
 int sole_reduction(int);
-void defreds(void);
 void free_action_row(action *);
 void free_parser(void);
 
@@ -420,13 +376,6 @@ void output(void);
 void output_rule_data(void);
 void output_yydefred(void);
 void output_actions(void);
-int find_conflict_base(int);
-void token_actions(void);
-void goto_actions(void);
-int default_goto(int);
-void save_column(int, int);
-void sort_actions(void);
-void pack_table(void);
 int matching_vector(int);
 int pack_vector(int);
 void output_base(void);
