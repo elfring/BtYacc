@@ -631,15 +631,20 @@ bucket *get_name()
     return (lookup(cache));
 }
 
-int get_number()
-{
-    register int c;
-    register int n;
+/* Return (possibly negative) integer stored a cptr. On exit, cptr
+   points to first character after integer. */
+int get_number() {
+  int n = 0;
+  char c, first = *cptr;
 
-    n = 0;
-    for (c = *cptr; isdigit(c); c = *++cptr)
-	n = 10*n + (c - '0');
-    return (n);
+  if (first == '-')
+    ++cptr;
+  for (c = *cptr; isdigit(c); c = *++cptr)
+    n = 10 * n + (c - '0');
+  if (first == '-')
+    n = -n;
+
+  return n;
 }
 
 // 
@@ -1421,19 +1426,15 @@ loop:
 		++cptr;
 		FREE(d_line);
 		goto loop; }
-	    else if (isdigit(c)) {
+	    else if (isdigit(c) || (c == '-' && isdigit(cptr[1]))) {
 		i = get_number();
-		if (i > maxoffset) {
+		if (i <= 0) {
+		    fprintf(f, "yyvsp[%d].%s", i - n, tag); }
+		else if (i > maxoffset) {
 		    dollar_warning(d_lineno, i);
 		    fprintf(f, "yyvsp[%d].%s", i - maxoffset, tag); }
 		else
 		    fprintf(f, "yyvsp[%d].%s", offsets[i], tag);
-		FREE(d_line);
-		goto loop; }
-	    else if (c == '-' && isdigit(cptr[1])) {
-		++cptr;
-		i = -get_number() - n;
-		fprintf(f, "yyvsp[%d].%s", i, tag);
 		FREE(d_line);
 		goto loop; }
 	    else if (isalpha(c) || c == '_') {

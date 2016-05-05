@@ -1,0 +1,20 @@
+btyacc (3.0-2) unstable; urgency=low
+
+  * Security bugfix: Switched to mkstemp() instead of mktemp(),
+    temporary files are unlink()ed immediately after creation
+  * Added parser skeleton /usr/doc/btyacc/examples/btyacc-c.ske.gz
+    which compiles both as C and C++
+  * Applied some compatibility fixes by Mitchell Charity, made
+    "usage:" message more verbose, made "skel2c" build script work
+    with all awks, not just gawk
+
+ -- Richard Atterer <atterer@debian.org>  Tue,  3 Jul 2001 21:59:14 +0200
+
+btyacc (3.0-1) unstable; urgency=low
+
+  * Initial Release. Finishes the ITP process, closes: #83946
+  * Applied 5 small bugfixes to the upstream source (see README.Debian)
+  * Wrote a man page
+
+ -- Richard Atterer <atterer@debian.org>  Wed, 31 Jan 2001 12:45:57 +0100
+

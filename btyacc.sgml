@@ -1,0 +1,608 @@
+<!doctype refentry PUBLIC "-//Davenport//DTD DocBook V3.0//EN">
+
+<!-- Manual page for btyacc, by Richard Atterer <atterer@debian.org>
+     Donated to the public domain. -->
+
+<refentry>
+  <docinfo>
+    <address>
+      <email>atterer@debian.org</email>
+    </address>
+    <author>
+      <firstname>Richard</firstname>
+      <surname>Atterer</surname>
+    </author>
+    <date>January 30, 2001</date>
+  </docinfo>
+  <refmeta>
+    <refentrytitle>btyacc</refentrytitle>
+    <manvolnum>1</manvolnum>
+  </refmeta>
+  <refnamediv>
+    <refname>btyacc</refname> <refpurpose>an LALR(1) parser generator
+      with support for backtracking</refpurpose>
+  </refnamediv>
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>btyacc</command>
+      <arg>-b <replaceable>prefix</replaceable></arg>
+      <arg>-d</arg>
+      <arg repeat>-D<replaceable>NAME</replaceable></arg>
+      <arg>-E</arg>
+      <arg>-l</arg>
+      <arg>-r</arg>
+      <arg>-S <replaceable>x.ske</replaceable></arg>
+      <arg>-t</arg>
+      <arg>-v</arg>
+      <arg choice="req"><replaceable>filename.y</replaceable></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+  <refsect1>
+    <title>Description</title>
+
+    <para>btyacc is a modified version of byacc (Berkeley YACC), which
+      in turn is a public domain version of the original AT&amp;T YACC
+      parser generator.</para>
+
+    <para>btyacc reads the grammar specification in the file
+      <replaceable>filename.y</replaceable> and generates an LR(1)
+      parser for it. The parser consists of a set of LALR(1) parsing
+      tables and a driver routine written in the C programming
+      language. btyacc normally writes the parse tables and the driver
+      routine to the file
+      <replaceable>prefix</replaceable><filename>.tab.c</filename>,
+      where <replaceable>prefix</replaceable> defaults to `y'.</para>
+
+    <para>For a detailed description of the format of a grammar
+      specification, and an excellent tutorial on how to use YACC-like
+      tools, see the info manual for GNU
+      <citerefentry><refentrytitle>bison</refentrytitle></citerefentry>. 
+      btyacc-specific extensions are explained below.</para>
+
+    <para><emphasis>Note:</emphasis> The parser skeleton supplied by
+      btyacc's upstream author only compiles as C++. Use the skeleton
+      <filename>/usr/doc/btyacc/examples/btyacc-c.ske</filename> to
+      generate a parser that compiles both as C and C++. 
+      (Unfortunately, this alternative skeleton does not currently
+      check malloc() return values.)</para>
+
+  </refsect1>
+  <refsect1>
+    <title>Options</title>
+
+    <variablelist>
+      <varlistentry>
+	<term>-b <replaceable>prefix</replaceable></term>
+	<listitem>
+	  <para>Change the prefix prepended to the output file names
+	  to the string denoted by <replaceable>prefix</replaceable>. 
+	  The default prefix is the character `y'.</para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>-d</term>
+	<listitem>
+	  <para>Create a header file called
+	    <replaceable>prefix</replaceable><filename>.tab.h</filename>
+	    along with
+	    <replaceable>prefix</replaceable><filename>.tab.c</filename>,
+	    containing the symbol definitions and a declaration for
+	    <literal>YYSTYPE</literal> and
+	    <literal>yylval</literal>.</para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>-D<replaceable>NAME</replaceable></term>
+	<listitem>
+	  <para>Define the btyacc preprocessor variable
+	    <replaceable>NAME</replaceable>, for use with
+	    <literal>%ifdef </literal><replaceable>NAME</replaceable>
+	    directives in the grammar file.</para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>-E</term>
+	<listitem>
+	  <para>Print the preprocessed grammar to standard
+	    output.</para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>-l</term>
+	<listitem>
+	  <para>Do not insert <literal>#line</literal> directives into
+	    the generated parser code.</para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>-r</term>
+	<listitem>
+	  <para>Write the parser code and the associated tables to
+	    different files. Whereas the tables can be found in
+	    <replaceable>prefix</replaceable><filename>.tab.c</filename>
+	    as before, the code now gets written to
+	    <replaceable>prefix</replaceable><filename>.code.c</filename>.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>-S <replaceable>x.ske</replaceable></term>
+	<listitem>
+	  <para>Select a different parser skeleton. The default
+	    skeleton is hardwired into the program, but a copy can be
+	    found in the file <filename>btyaccpa.ske</filename>.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>-t</term>
+	<listitem>
+	  <para>Cause debugging code to be compiled into the generated
+	    parser.</para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>-v</term>
+	<listitem>
+	  <para>Write a human-readable description of the generated
+	    parser to <filename>y.output</filename>. It includes
+	    parser states, actions for a look-ahead token and
+	    information about any conflicts.</para>
+	</listitem>
+      </varlistentry>
+    </variablelist>
+
+  </refsect1>
+  <refsect1>
+    <title>BTYACC extensions</title>
+
+    <refsect2>
+      <title>Backtracking support</title>
+
+      <para>Whenever a btyacc generated parser runs into a
+	shift-reduce or reduce-reduce error in the parse table, it
+	remembers the current parse point (stack and input stream
+	state), and goes into trial parse mode. It then continues
+	parsing, ignoring most rule actions. If it runs into an error
+	(either through the parse table or through an action calling
+	<literal>YYERROR</literal>), it backtracks to the most recent
+	conflict point and tries a different alternative. If it finds
+	a successful path (reaches the end of the input or an action
+	calls <literal>YYVALID</literal>), it backtracks to the point
+	where it first entered trial parse mode, and continues with a
+	full parse (executing all actions), following the path of the
+	successful trial.</para>
+
+      <para>Actions in btyacc come in two flavors:
+	<literal>{}</literal> actions, which are only executed when
+	not in trial mode, and <literal>[]</literal> actions, which
+	are executed regardless of mode.</para>
+
+      <para>Example: In YACC grammars for C, a
+	standard hack known as the "lexer feedback hack" is used to
+	find typedef names. The lexer uses semantic information to
+	decide if any given identifier is a typedef name or not and
+	returns a special token. With btyacc, you no longer need to do
+	this; the lexer should just always return an identifier. The
+	btyacc grammar then needs a rule of the form:</para>
+
+      <para><literal>typename: ID [ if (!IsTypeName(LookupId($1)))
+	  YYERROR; ]</literal></para>
+
+      <para>However, note that adding backtracking rules slows down
+	the parser. In practice, you should try to restrict the number
+	of conflicts in the grammar to what is absolutely necessary. 
+	Consider using the "lexer feedback hack" if it is a clean
+	solution, and reserve backtracking for a few special
+	cases.</para>
+
+      <para>btyacc runs its trials using the rule "try shifting first,
+	then try reducing in the order that the conflicting rules
+	appear in the input file". This means you can implement
+	semantic disambiguation rules like, for example: (1) If it
+	looks like a declaration it is, otherwise (2) If it looks like
+	an expression it is, otherwise (3) it is a syntax error [Ellis
+	&amp; Stroustrup, Annotated C++ Reference Manual, p93]. To
+	achieve this, put all the rules for declarations before the
+	rules for expressions in the grammar file.</para>
+
+      <para>Backtracking is only triggered when the parse hits a
+	shift/reduce or reduce/reduce conflict in the table. If you
+	have no conflicts in your grammar, there is no extra cost,
+	other than some extra code which will never be invoked.</para>
+
+      <para>Currently, the generated parser performs
+	<emphasis>no</emphasis> pruning of alternate parsing paths. To
+	avoid an exponential explosion of possible paths (and parsing
+	time), you need to manually tell the parser when it can throw
+	away saved paths using the <literal>YYVALID</literal>
+	statement. In practice, this turns out to be fairly easy to
+	do. For example, a C++ parser can just contain
+	<literal>[YYVALID;]</literal> after every complete declaration
+	and statement rule, resulting in the backtracking state being
+	pruned after seeing a `;' or `}' - there will never be a
+	situation in which it is useful to backtrack past either of
+	these.</para>
+
+    </refsect2>
+    <refsect2>
+      <title>Improved token position handling</title>
+
+      <para>Compilers often need to build ASTs (abstract syntax trees)
+	such that every node in a tree can relate to the parsed
+	program source it came from. The <literal>YYPOSN</literal>
+	mechanism supported by btyacc helps you in automating the text
+	position computation and in assigning the computed text
+	positions to the AST nodes.</para>
+
+      <para>In standard YACCs every token and every non-terminal
+	has an <literal>YYSTYPE</literal> semantic value attached to
+	it. With btyacc, every token and every non-terminal also has
+	an <literal>YYPOSN</literal> text position attached to it. 
+	<literal>YYPOSN</literal> is a user-defined type.</para>
+
+      <para>btyacc maintains a stack of text position values in the
+	same way that it maintains a stack of semantic values. To make
+	use of the text position feature, you need to
+	<literal>#define</literal> the following:
+
+	<variablelist>
+	  <varlistentry>
+	    <term>YYPOSN</term>
+	    <listitem>
+	      <para>Preprocessor symbol for the C/C++ type of
+		the text position attached to every token and
+		non-terminal.</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>yyposn</term>
+	    <listitem>
+	      <para>Global variable of type <literal>YYPOSN</literal>. 
+		The lexer must assign the text position of the
+		returned token to yyposn, just like it assigns the
+		semantic value of the returned token to yylval.</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>YYREDUCEPOSNFUNC</term>
+	    <listitem>
+
+	      <para>Preprocessor symbol for a function that is called
+		immediately after the regular grammar rule reduction
+		has been performed, to reduce text positions located
+		on the stack.</para>
+
+	      <para>Typically, this function extracts text positions
+		from the right-hand side rule components and either
+		assigns them to the returned $$ structure/tree or, if
+		no $$ value is returned, puts them into the ret text
+		position where it will be picked up by other rules
+		later. Its prototype is:
+
+		<funcsynopsis>
+		  <funcprototype>
+		    <funcdef>void <function>ReducePosn</function></funcdef>
+		    <paramdef>YYPOSN&amp; <parameter>ret</parameter></paramdef>
+		    <paramdef>YYPOSN* <parameter>term_posns</parameter></paramdef>
+		    <paramdef>YYSTYPE* <parameter>term_vals</parameter></paramdef>
+		    <paramdef>int <parameter>term_no</parameter></paramdef>
+		    <paramdef>int <parameter>stk_pos</parameter></paramdef>
+		    <paramdef>int <parameter>yychar</parameter></paramdef>
+		    <paramdef>YYPOSN&amp; <parameter>yyposn</parameter></paramdef>
+		    <paramdef>UserType <parameter>extra</parameter></paramdef>
+		  </funcprototype>
+	        </funcsynopsis>
+
+		<variablelist>
+		  <varlistentry>
+		    <term>ret</term>
+		    <listitem><para>Reference to the text position
+			returned by the rule. You must overwrite this
+			with the computed text position that the rule
+			yields, analogous to the $$ semantic
+			value.</para></listitem>
+		  </varlistentry>
+		  <varlistentry>
+		    <term>term_posns</term>
+		    <listitem><para>Array of the right-hand side rule
+			components' <literal>YYPOSN</literal> text
+			positions, analogous to $1, $2, ..., $N for
+			the semantic values.</para></listitem>
+		  </varlistentry>
+		  <varlistentry>
+		    <term>term_vals</term>
+		    <listitem><para>Array of the right-hand side rule
+			components' <literal>YYSTYPE</literal> values. 
+			These are the $1, ..., $N
+			themselves.</para></listitem>
+		  </varlistentry>
+		  <varlistentry>
+		    <term>term_no</term>
+		    <listitem><para>Number of components in the right
+			hand side of the reduced rule, i.e. the size
+			of the term_posns and term_vals arrays. Also
+			equal to N in $1, ..., $N.</para></listitem>
+		  </varlistentry>
+		  <varlistentry>
+		    <term>stk_pos</term>
+		    <listitem><para><literal>YYSTYPE</literal>/<literal>YYPOSN</literal>
+			stack position before the
+			reduction.</para></listitem>
+		  </varlistentry>
+		  <varlistentry>
+		    <term>yychar</term>
+		    <listitem><para>Lookahead token that immediately
+			follows the reduced right hand side
+			components.</para></listitem>
+		  </varlistentry>
+		  <varlistentry>
+		    <term>yyposn</term>
+		    <listitem><para><literal>YYPOSN</literal> of the
+			token that immediately follows the reduced
+			right hand side components.</para></listitem>
+		  </varlistentry>
+		  <varlistentry>
+		    <term>extra</term>
+		    <listitem><para>User-defined extra argument passed
+			to ReducePosn.</para></listitem>
+		  </varlistentry>
+		</variablelist>
+	      </para>
+
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>YYREDUCEPOSNFUNCARG</term>
+	    <listitem><para>Extra argument passed to the ReducePosn
+		function. This argument can be any variable defined in
+		<filename>btyaccpa.ske</filename>.</para></listitem>
+	  </varlistentry>
+	</variablelist>
+
+      </para>
+
+    </refsect2>
+    <refsect2>
+      <title>Token deallocation during error recovery</title>
+
+      <para>For most YACC-like parser generators, the action of the
+	generated parser upon encountering a parse error is to throw
+	away semantic values and input tokens until a rule containing
+	the special non-terminal <literal>error</literal> can be
+	matched. Discarding of tokens is simply performed by
+	overwriting variables and array entries of type
+	<literal>YYSTYPE</literal> with new values.</para>
+
+      <para>Unfortunately, this approach leads to a memory leak if
+	<literal>YYSTYPE</literal> is a pointer type. btyacc allows
+	you to supply functions for cleaning up the semantic and text
+	position values, by <literal>#define</literal>ing the
+	following symbols in the preamble of your grammar file:</para>
+
+      <para>
+	<variablelist>
+	  <varlistentry>
+	    <term>YYDELETEVAL</term>
+	    <listitem><para>Preprocessor symbol for a function to call
+		before the semantic value of a token or non-terminal
+		is discarded.</para></listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>YYDELETEPOSN</term>
+	    <listitem><para>Preprocessor symbol for a function to call
+		before the text position of a token or non-terminal is
+		discarded.</para></listitem>
+	  </varlistentry>
+	</variablelist>
+      </para>
+	
+      <para>Both functions are called with two arguments. The first
+	argument of type <literal>YYSTYPE</literal> or
+	<literal>YYPOSN</literal> is the value that will be discarded. 
+	The second argument is of type <literal>int</literal> and is
+	one of three values:
+	<variablelist>
+	  <varlistentry>
+	    <term>0</term><listitem><para>discarding input
+		token</para></listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>1</term><listitem><para>discarding state on
+		stack</para></listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term>2</term><listitem><para>cleaning up stack when
+		aborting</para></listitem>
+	  </varlistentry>
+	</variablelist>
+      
+      </para>
+
+    </refsect2>
+    <refsect2>
+      <title>Detailed syntax error reporting</title>
+
+      <para>If you <literal>#define</literal> the preprocessor
+	variable <literal>YYERROR_DETAILED</literal> in your grammar
+	file, you must also define the following error processing
+	function:
+
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef>void <function>yyerror_detailed</function></funcdef>
+	    <paramdef>char* <parameter>text</parameter></paramdef>
+	    <paramdef>int <parameter>errt</parameter></paramdef>
+	    <paramdef>YYSTYPE&amp;
+	      <parameter>errt_value</parameter></paramdef>
+	    <paramdef>YYPOSN&amp; <parameter>errt_posn</parameter></paramdef>
+	  </funcprototype>
+	</funcsynopsis>
+      </para>
+
+      <variablelist>
+	<varlistentry>
+	  <term>text</term>
+	  <listitem><para>error message</para></listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>errt</term>
+	  <listitem><para>code of the token that caused the
+	      error</para></listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>errt_value</term>
+	  <listitem><para>value of the token that caused the
+	      error</para></listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>errt_posn</term>
+	  <listitem><para>text position of token that caused
+	      error</para></listitem>
+	</varlistentry>
+      </variablelist>
+
+    </refsect2>
+    <refsect2>
+      <title>Preprocessor directives</title>
+
+      <para>btyacc supports defining symbols and acting on them with
+	conditional directives inside grammar files, not unlike the C
+	preprocessor.</para>
+
+      <variablelist>
+	<varlistentry>
+	  <term>%define <replaceable>NAME</replaceable></term>
+	  <listitem><para>Define the preprocessor symbol
+	      <replaceable>NAME</replaceable>. Equivalent to the
+	      command line switch
+	      <literal>-D</literal><replaceable>NAME</replaceable>.
+	      </para></listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>%ifdef <replaceable>NAME</replaceable></term>
+	  <listitem><para>If preprocessor variable
+	      <replaceable>NAME</replaceable> is defined, process the
+	      text from this <literal>%ifdef</literal> to the closing
+	      <literal>%endif</literal>, otherwise skip
+	      it.</para></listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>%endif</term>
+	  <listitem><para>Closing directive for
+	      <literal>%ifdef</literal>. <literal>%ifdef</literal>s
+	      cannot be nested.</para></listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>%include <replaceable>FILENAME</replaceable></term>
+	  <listitem><para>Process contents of the file named
+	      <replaceable>FILENAME</replaceable>. Only one nesting
+	      level of <literal>%include</literal> is
+	      allowed.</para></listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>%ident <replaceable>STRING</replaceable></term>
+	  <listitem><para>Insert an `<literal>#ident
+	  </literal><replaceable>STRING</replaceable>' directive into
+	  the output file. <replaceable>STRING</replaceable> must be a
+	  string constant enclosed in "".</para></listitem>
+	</varlistentry>
+      </variablelist>
+
+    </refsect2>
+    <refsect2>
+      <title>Inherited attributes</title>
+
+      <para>Inherited attributes are undocumented. (See the
+	<filename>README</filename> and the btyacc source code for a
+	little information.) If you work out how they work, contact me
+	at &lt;<email>atterer@debian.org</email>&gt;!</para>
+
+    </refsect2>
+
+  </refsect1>
+  <refsect1>
+    <title>Bugs</title>
+
+    <para>The worst-case complexity of parsing is exponential for any
+      grammar which allows backtracking to take place. In other words,
+      a btyacc-generated parser constitutes a denial-of-service bug if
+      used in applications where an attacker is able to supply
+      specially crafted data as input to the parser. (For all
+      "regular" input data, the potentially exponential complexity is
+      not normally an issue.)</para>
+
+    <para>bison's <literal>%expect</literal> directive is not
+      supported.</para>
+
+    <para>There is no <literal>%else</literal> and
+      <literal>%ifndef</literal>. <literal>%ifdef</literal>s and
+      <literal>%include</literal>s cannot be nested.</para>
+
+  </refsect1>
+  <refsect1>
+    <title>Authors</title>
+
+    <para>Robert Corbett
+      &lt;<email>robert.corbett@eng.sun.com</email>&gt; /
+      &lt;<email>corbett@berkeley.edu</email>&gt; was one of the
+      original authors of Berkeley byacc. Chris Dodd
+      &lt;<email>chrisd@reservoir.com</email>&gt; had the brilliant
+      idea of adding backtracking capabilities, and is responsible for
+      the initial backtracking changes. Vadim Maslov
+      &lt;<email>vadik@siber.com</email>&gt; further improved the
+      code.</para>
+
+    <para>This documenation was written by Richard Atterer
+      &lt;<email>atterer@debian.org</email>&gt; for the Debian
+      GNU/Linux distribution, but is donated to the public domain and
+      may thus be used freely for any purpose.</para>
+
+  </refsect1>
+  <refsect1>
+    <title>Files</title>
+
+    <para><simplelist columns="1">
+	<member>
+	  <filename>/usr/doc/btyacc/examples/btyaccpa.ske</filename>
+	</member>
+	<member>
+	  <filename>/usr/doc/btyacc/examples/btyacc-c.ske</filename>
+	</member>
+	<member><filename>/usr/doc/btyacc/README</filename></member>
+    </simplelist></para>
+
+  </refsect1>
+  <refsect1>
+    <title>See also</title>
+
+    <para>
+      <citerefentry><refentrytitle>bison</refentrytitle>
+	<manvolnum>1</manvolnum></citerefentry> (or `info bison'),
+      <citerefentry><refentrytitle>byacc</refentrytitle>
+	<manvolnum>1</manvolnum></citerefentry>,
+      <citerefentry><refentrytitle>yacc</refentrytitle>
+	<manvolnum>1</manvolnum></citerefentry>,
+      <citerefentry><refentrytitle>antlr</refentrytitle>
+	<manvolnum>1</manvolnum></citerefentry>
+    </para>
+
+  </refsect1>
+</refentry>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:2
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-default-dtd-file:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+-->

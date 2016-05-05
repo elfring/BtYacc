@@ -1,7 +1,10 @@
 #include "defs.h"
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 char dflag;
 char lflag;
@@ -69,14 +72,11 @@ char *nullable;
 
 void done(int k)
 {
-    if (action_file) { fclose(action_file); unlink(action_file_name); }
-    if (text_file) { fclose(text_file); unlink(text_file_name); }
-    if (union_file) { fclose(union_file); unlink(union_file_name); }
     exit(k);
 }
 
 
-void onintr()
+void onintr(int ignored)
 {
     done(1);
 }
@@ -99,11 +99,19 @@ void set_signals()
 }
 
 
-void usage()
-{
-    fprintf(stderr, "usage: %s [-dlrtv] [-b file_prefix] [-S skeleton file] "
-		    "filename\n", myname);
-    exit(1);
+void usage() {
+  printf("usage: %s [OPTIONS] file\n", myname);
+  puts(
+    "  -b prefix    Change `y' into `prefix' in all output filenames\n"
+    "  -d           Generate header file `y.tab.h'\n"
+    "  -DNAME       Define btyacc preprocessor variable NAME\n"
+    "  -E           Print preprocessed grammar to stdout\n"
+    "  -l           Do not insert #line directives into generated code\n"
+    "  -r           Write tables to `y.tab.c', code to `y.code.c'\n"
+    "  -S x.skel    Select parser skeleton\n"
+    "  -t           Include debugging code in generated parser\n"
+    "  -v           Write description of parser to `y.output'");
+  exit(1);
 }
 
 
@@ -295,19 +303,6 @@ void create_file_names()
     text_file_name[len + 5] = 't';
     union_file_name[len + 5] = 'u';
 
-    if(mktemp(action_file_name)==NULL) {
-      fprintf(stderr, "btyacc: Cannot create temporary file\n");
-      exit(1);
-    }
-    if(mktemp(text_file_name)==NULL) {
-      fprintf(stderr, "btyacc: Cannot create temporary file\n");
-      exit(1);
-    }
-    if(mktemp(union_file_name)==NULL) {
-      fprintf(stderr, "btyacc: Cannot create temporary file\n");
-      exit(1);
-    }
-
     len = strlen(file_prefix);
 
     output_file_name = MALLOC(len + 7);
@@ -347,6 +342,23 @@ void create_file_names()
 }
 
 
+static FILE* my_mkstemp(char* template) {
+    /* Some old implementations of mkstemp() create files mode 0666. 
+       We change the umask to avoid any problem. */
+  mode_t old_mode;
+  int fd;
+  FILE* result;
+
+  old_mode = umask(077);
+  fd = mkstemp(template);
+  umask(old_mode);
+  if (fd == -1) return 0;
+  result = fdopen(fd, "w+b"); // result == 0 on error
+  unlink(template);
+  return result;
+}
+
+
 void open_files()
 {
     create_file_names();
@@ -358,11 +370,11 @@ void open_files()
 	    open_error(input_file_name);
     }
 
-    action_file = fopen(action_file_name, "w");
+    action_file = my_mkstemp(action_file_name);
     if (action_file == 0)
 	open_error(action_file_name);
 
-    text_file = fopen(text_file_name, "w");
+    text_file = my_mkstemp(text_file_name);
     if (text_file == 0)
 	open_error(text_file_name);
 
@@ -378,7 +390,7 @@ void open_files()
 	defines_file = fopen(defines_file_name, "w");
 	if (defines_file == 0)
 	    open_error(defines_file_name);
-	union_file = fopen(union_file_name, "w");
+	union_file = my_mkstemp(union_file_name);
 	if (union_file ==  0)
 	    open_error(union_file_name);
     }

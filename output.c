@@ -849,9 +849,7 @@ void output_defines()
 
     if (dflag && unionized)
     {
-	fclose(union_file);
-	union_file = fopen(union_file_name, "r");
-	if (union_file == NULL) open_error(union_file_name);
+	rewind(union_file);
 	while ((c = getc(union_file)) != EOF) {
 	  putc(c, defines_file);
 	}
@@ -871,10 +869,7 @@ void output_stored_text()
     register int state;	/* 0=middle of line, 1=start of line, 2=seen '#' */
 
     state = 1;
-    fclose(text_file);
-    text_file = fopen(text_file_name, "r");
-    if (text_file == NULL)
-	open_error(text_file_name);
+    rewind(text_file);
     in = text_file;
     if ((c = getc(in)) == EOF)
 	return;
@@ -1191,11 +1186,7 @@ void output_semantic_actions()
     register int state;	/* 0=middle of line, 1=start of line, 2=seen '#' */
 
     state = 1;
-    fclose(action_file);
-    action_file = fopen(action_file_name, "r");
-    if (action_file == NULL)
-	open_error(action_file_name);
-
+    rewind(action_file);
     if ((c = getc(action_file)) == EOF)
 	return;
 

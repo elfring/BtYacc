@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+if test $1 != "upgrade"; then
+    update-alternatives \
+	--install /usr/bin/yacc yacc /usr/bin/btyacc 80 \
+        --slave /usr/share/man/man1/yacc.1.gz yaccman /usr/share/man/man1/btyacc.1.gz
+
+fi
+
+#DEBHELPER#
+
+exit 0
+
+

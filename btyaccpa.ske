@@ -64,14 +64,14 @@ extern _C_ char *yyrule[];
 #define YYPOSNOUT    (yyps->pos)
 #endif
 
-// If delete function is not defined by the user, do not deletions.
+/* If delete function is not defined by the user, do not delete. */
 #ifndef YYDELETEVAL
-#define YYDELETEVAL(v) 
+#  define YYDELETEVAL(v, t) 
 #endif
 
-// If delete function is not defined by the user, do not deletions.
+/* If delete function is not defined by the user, do not delete. */
 #ifndef YYDELETEPOSN
-#define YYDELETEPOSN(v) 
+#  define YYDELETEPOSN(v, t) 
 #endif
 
 #define yyclearin (yychar=(-1))
@@ -552,14 +552,20 @@ yyreduce:
     YYMoreStack(yyps);
   }
 
+# ifdef _YACC_DEFAULT_ACTION_
   /* "$$ = NULL" default action */
   memset(&yyps->val, 0, sizeof(yyps->val));
+# else
+  /* RA: bison compatibility: default action is '$$ = $1;' */
+  if (yym > 0) yyps->val = (yyps->vsp)[1 - yym];
+# endif
 
-  /* default reduced position is NULL -- no position at all.
-     no position will be assigned at trial time and if no position handling is present */
+  /* Default reduced position is NULL -- no position at all. No
+     position will be assigned at trial time and if no position
+     handling is present */
   memset(&yyps->pos, 0, sizeof(yyps->pos));
 
-  reduce_posn = TRUE;
+  reduce_posn = 1;
 
   switch (yyn) {
 

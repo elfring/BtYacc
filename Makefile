@@ -2,15 +2,18 @@
 # Makefile for BtYacc.
 #
 
-VERSION       = 3-0
+# Edited for Debian GNU/Linux.
+DESTDIR =
+
+VERSION       = 3.0
 
 DEST	      = .
 
 HDRS	      = defs.h mstring.h
 
-CFLAGS	      = -g -Wall -Wstrict-prototypes -Wmissing-prototypes
+CFLAGS	      = -g -Wall -O2 -Wstrict-prototypes -Wmissing-prototypes
 
-LDFLAGS	      = -static
+LDFLAGS	      = #-static
 
 LIBS	      =
 
@@ -35,7 +38,7 @@ OTHERS	      = README README.BYACC \
 		Makefile btyaccpa.ske push.skel empty.y skel2c manpage makefile.dos \
 		skeleton.c
 
-all:		$(PROGRAM)
+all:		$(PROGRAM) btyacc.1
 
 $(PROGRAM):     $(OBJS) $(LIBS)
 		$(LINKER) $(LDFLAGS) -o $(PROGRAM) $(OBJS) $(LIBS)
@@ -51,7 +54,7 @@ depend:;	mkmf -f $(MAKEFILE) PROGRAM=$(PROGRAM) DEST=$(DEST)
 index:;		ctags -wx $(HDRS) $(SRCS)
 
 install:	$(PROGRAM)
-		cp $(PROGRAM).exe /bin
+		install $(PROGRAM) $(DESTDIR)/usr/bin
 
 oldinstall:	$(PROGRAM)
 		@echo Installing $(PROGRAM) in $(DEST)
@@ -79,10 +82,13 @@ zip:
 		mv btyacc.zip btyacc-$(VERSION).zip
 
 skeleton.c: btyaccpa.ske skel2c
-		awk -f skel2c btyaccpa.ske >skeleton.c
+		awk -f skel2c btyaccpa.ske > skeleton.c
 
 etags TAGS:
 		etags *.c *.h
+
+btyacc.1:	btyacc.sgml
+		docbook-to-man btyacc.sgml > btyacc.1
 
 ###
 closure.o: defs.h

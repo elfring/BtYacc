@@ -1,0 +1,24 @@
+Source: btyacc
+Section: devel
+Priority: extra
+Maintainer: Richard Atterer <atterer@debian.org>
+Standards-Version: 3.2.1
+Build-Depends: debhelper (>= 3.0.15)
+
+Package: btyacc
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Backtracking parser generator based on byacc
+ btyacc is a hacked version of the original Berkeley "byacc". The main
+ change to byacc is the addition of backtracking code, allowing you to
+ try both alternatives in case of shift-reduce or reduce-reduce
+ conflicts. As long as no backtracking takes place, speed is comparable
+ to bison.
+ .
+ Additional features:
+  - enhanced support for storing of text position information for tokens
+  - closes the potential *yacc/bison memory leak during error recovery
+  - preprocessor directives like %ifdef, %include
+  - C++ friendly
+ .
+ Related packages: bison, byacc, antlr
