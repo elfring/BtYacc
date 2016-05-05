@@ -1,0 +1,455 @@
+.\" This -*- nroff -*- file has been generated from
+.\" DocBook SGML with docbook-to-man on Debian GNU/Linux.
+...\"
+...\"	transcript compatibility for postscript use.
+...\"
+...\"	synopsis:  .P! <file.ps>
+...\"
+.de P!
+\\&.
+.fl			\" force out current output buffer
+\\!%PB
+\\!/showpage{}def
+...\" the following is from Ken Flowers -- it prevents dictionary overflows
+\\!/tempdict 200 dict def tempdict begin
+.fl			\" prolog
+.sy cat \\$1\" bring in postscript file
+...\" the following line matches the tempdict above
+\\!end % tempdict %
+\\!PE
+\\!.
+.sp \\$2u	\" move below the image
+..
+.de pF
+.ie     \\*(f1 .ds f1 \\n(.f
+.el .ie \\*(f2 .ds f2 \\n(.f
+.el .ie \\*(f3 .ds f3 \\n(.f
+.el .ie \\*(f4 .ds f4 \\n(.f
+.el .tm ? font overflow
+.ft \\$1
+..
+.de fP
+.ie     !\\*(f4 \{\
+.	ft \\*(f4
+.	ds f4\"
+'	br \}
+.el .ie !\\*(f3 \{\
+.	ft \\*(f3
+.	ds f3\"
+'	br \}
+.el .ie !\\*(f2 \{\
+.	ft \\*(f2
+.	ds f2\"
+'	br \}
+.el .ie !\\*(f1 \{\
+.	ft \\*(f1
+.	ds f1\"
+'	br \}
+.el .tm ? font underflow
+..
+.ds f1\"
+.ds f2\"
+.ds f3\"
+.ds f4\"
+'\" t 
+.ta 8n 16n 24n 32n 40n 48n 56n 64n 72n  
+.TH "btyacc" "1" 
+.SH "NAME" 
+btyacc \(em an LALR(1) parser generator 
+with support for backtracking 
+.SH "SYNOPSIS" 
+.PP 
+\fBbtyacc\fP [-b \fIprefix\fP]  [-d]  [-D\fINAME\fP \&...]  [-E]  [-l]  [-r]  [-S \fIx.ske\fP]  [-t]  [-v] \fIfilename.y\fP  
+.SH "Description" 
+.PP 
+btyacc is a modified version of byacc (Berkeley YACC), which 
+in turn is a public domain version of the original AT&T YACC 
+parser generator. 
+.PP 
+btyacc reads the grammar specification in the file 
+\fIfilename.y\fP and generates an LR(1) 
+parser for it. The parser consists of a set of LALR(1) parsing 
+tables and a driver routine written in the C programming 
+language. btyacc normally writes the parse tables and the driver 
+routine to the file 
+\fIprefix\fP\fB.tab.c\fP, 
+where \fIprefix\fP defaults to `y'. 
+.PP 
+For a detailed description of the format of a grammar 
+specification, and an excellent tutorial on how to use YACC-like 
+tools, see the info manual for GNU 
+\fBbison\fP.  
+btyacc-specific extensions are explained below. 
+.PP 
+\fINote:\fP The parser skeleton supplied by 
+btyacc's upstream author only compiles as C++. Use the skeleton 
+\fB/usr/doc/btyacc/examples/btyacc-c.ske\fP to 
+generate a parser that compiles both as C and C++.  
+(Unfortunately, this alternative skeleton does not currently 
+check malloc() return values.) 
+.SH "Options" 
+.IP "-b \fIprefix\fP" 10 
+Change the prefix prepended to the output file names 
+to the string denoted by \fIprefix\fP.  
+The default prefix is the character `y'. 
+.IP "-d" 10 
+Create a header file called 
+\fIprefix\fP\fB.tab.h\fP 	    along with 
+\fIprefix\fP\fB.tab.c\fP, 
+containing the symbol definitions and a declaration for 
+\fBYYSTYPE\fP and 
+\fByylval\fP. 
+.IP "-D\fINAME\fP" 10 
+Define the btyacc preprocessor variable 
+\fINAME\fP, for use with 
+\fB%ifdef \fP\fINAME\fP 	    directives in the grammar file. 
+.IP "-E" 10 
+Print the preprocessed grammar to standard 
+output. 
+.IP "-l" 10 
+Do not insert \fB#line\fP directives into 
+the generated parser code. 
+.IP "-r" 10 
+Write the parser code and the associated tables to 
+different files. Whereas the tables can be found in 
+\fIprefix\fP\fB.tab.c\fP 	    as before, the code now gets written to 
+\fIprefix\fP\fB.code.c\fP. 
+ 
+.IP "-S \fIx.ske\fP" 10 
+Select a different parser skeleton. The default 
+skeleton is hardwired into the program, but a copy can be 
+found in the file \fBbtyaccpa.ske\fP. 
+ 
+.IP "-t" 10 
+Cause debugging code to be compiled into the generated 
+parser. 
+.IP "-v" 10 
+Write a human-readable description of the generated 
+parser to \fBy.output\fP. It includes 
+parser states, actions for a look-ahead token and 
+information about any conflicts. 
+.SH "BTYACC extensions" 
+.SS "Backtracking support" 
+.PP 
+Whenever a btyacc generated parser runs into a 
+shift-reduce or reduce-reduce error in the parse table, it 
+remembers the current parse point (stack and input stream 
+state), and goes into trial parse mode. It then continues 
+parsing, ignoring most rule actions. If it runs into an error 
+(either through the parse table or through an action calling 
+\fBYYERROR\fP), it backtracks to the most recent 
+conflict point and tries a different alternative. If it finds 
+a successful path (reaches the end of the input or an action 
+calls \fBYYVALID\fP), it backtracks to the point 
+where it first entered trial parse mode, and continues with a 
+full parse (executing all actions), following the path of the 
+successful trial. 
+.PP 
+Actions in btyacc come in two flavors: 
+\fB{}\fP actions, which are only executed when 
+not in trial mode, and \fB[]\fP actions, which 
+are executed regardless of mode. 
+.PP 
+Example: In YACC grammars for C, a 
+standard hack known as the "lexer feedback hack" is used to 
+find typedef names. The lexer uses semantic information to 
+decide if any given identifier is a typedef name or not and 
+returns a special token. With btyacc, you no longer need to do 
+this; the lexer should just always return an identifier. The 
+btyacc grammar then needs a rule of the form: 
+.PP 
+\fBtypename: ID [ if (!IsTypeName(LookupId($1))) 
+YYERROR; ]\fP 
+.PP 
+However, note that adding backtracking rules slows down 
+the parser. In practice, you should try to restrict the number 
+of conflicts in the grammar to what is absolutely necessary.  
+Consider using the "lexer feedback hack" if it is a clean 
+solution, and reserve backtracking for a few special 
+cases. 
+.PP 
+btyacc runs its trials using the rule "try shifting first, 
+then try reducing in the order that the conflicting rules 
+appear in the input file". This means you can implement 
+semantic disambiguation rules like, for example: (1) If it 
+looks like a declaration it is, otherwise (2) If it looks like 
+an expression it is, otherwise (3) it is a syntax error [Ellis 
+& Stroustrup, Annotated C++ Reference Manual, p93]. To 
+achieve this, put all the rules for declarations before the 
+rules for expressions in the grammar file. 
+.PP 
+Backtracking is only triggered when the parse hits a 
+shift/reduce or reduce/reduce conflict in the table. If you 
+have no conflicts in your grammar, there is no extra cost, 
+other than some extra code which will never be invoked. 
+.PP 
+Currently, the generated parser performs 
+\fIno\fP pruning of alternate parsing paths. To 
+avoid an exponential explosion of possible paths (and parsing 
+time), you need to manually tell the parser when it can throw 
+away saved paths using the \fBYYVALID\fP 	statement. In practice, this turns out to be fairly easy to 
+do. For example, a C++ parser can just contain 
+\fB[YYVALID;]\fP after every complete declaration 
+and statement rule, resulting in the backtracking state being 
+pruned after seeing a `;' or `}' - there will never be a 
+situation in which it is useful to backtrack past either of 
+these. 
+.SS "Improved token position handling" 
+.PP 
+Compilers often need to build ASTs (abstract syntax trees) 
+such that every node in a tree can relate to the parsed 
+program source it came from. The \fBYYPOSN\fP 	mechanism supported by btyacc helps you in automating the text 
+position computation and in assigning the computed text 
+positions to the AST nodes. 
+.PP 
+In standard YACCs every token and every non-terminal 
+has an \fBYYSTYPE\fP semantic value attached to 
+it. With btyacc, every token and every non-terminal also has 
+an \fBYYPOSN\fP text position attached to it.  
+\fBYYPOSN\fP is a user-defined type. 
+.PP 
+btyacc maintains a stack of text position values in the 
+same way that it maintains a stack of semantic values. To make 
+use of the text position feature, you need to 
+\fB#define\fP the following: 
+ 
+ 
+.IP "YYPOSN" 10 
+Preprocessor symbol for the C/C++ type of 
+the text position attached to every token and 
+non-terminal. 
+.IP "yyposn" 10 
+Global variable of type \fBYYPOSN\fP.  
+The lexer must assign the text position of the 
+returned token to yyposn, just like it assigns the 
+semantic value of the returned token to yylval. 
+.IP "YYREDUCEPOSNFUNC" 10 
+Preprocessor symbol for a function that is called 
+immediately after the regular grammar rule reduction 
+has been performed, to reduce text positions located 
+on the stack. 
+.IP "" 10 
+Typically, this function extracts text positions 
+from the right-hand side rule components and either 
+assigns them to the returned $$ structure/tree or, if 
+no $$ value is returned, puts them into the ret text 
+position where it will be picked up by other rules 
+later. Its prototype is: 
+ 
+ 
+.PP 
+.nf 
+.ta 8n 16n 24n 32n 40n 48n 56n 64n 72n 
+.sp 1 
+\fBvoid \fBReducePosn\fP\fR( 
+\fBYYPOSN& \fBret\fR\fR, 
+\fBYYPOSN* \fBterm_posns\fR\fR, 
+\fBYYSTYPE* \fBterm_vals\fR\fR, 
+\fBint \fBterm_no\fR\fR, 
+\fBint \fBstk_pos\fR\fR, 
+\fBint \fByychar\fR\fR, 
+\fBYYPOSN& \fByyposn\fR\fR, 
+\fBUserType \fBextra\fR\fR); 
+.fi 
+ 
+ 
+.RS 
+.IP "ret" 10 
+Reference to the text position 
+returned by the rule. You must overwrite this 
+with the computed text position that the rule 
+yields, analogous to the $$ semantic 
+value. 
+.IP "term_posns" 10 
+Array of the right-hand side rule 
+components' \fBYYPOSN\fP text 
+positions, analogous to $1, $2, ..., $N for 
+the semantic values. 
+.IP "term_vals" 10 
+Array of the right-hand side rule 
+components' \fBYYSTYPE\fP values.  
+These are the $1, ..., $N 
+themselves. 
+.IP "term_no" 10 
+Number of components in the right 
+hand side of the reduced rule, i.e. the size 
+of the term_posns and term_vals arrays. Also 
+equal to N in $1, ..., $N. 
+.IP "stk_pos" 10 
+\fBYYSTYPE\fP/\fBYYPOSN\fP 			stack position before the 
+reduction. 
+.IP "yychar" 10 
+Lookahead token that immediately 
+follows the reduced right hand side 
+components. 
+.IP "yyposn" 10 
+\fBYYPOSN\fP of the 
+token that immediately follows the reduced 
+right hand side components. 
+.IP "extra" 10 
+User-defined extra argument passed 
+to ReducePosn. 
+.RE 
+ 
+.IP "YYREDUCEPOSNFUNCARG" 10 
+Extra argument passed to the ReducePosn 
+function. This argument can be any variable defined in 
+\fBbtyaccpa.ske\fP.  
+ 
+.SS "Token deallocation during error recovery" 
+.PP 
+For most YACC-like parser generators, the action of the 
+generated parser upon encountering a parse error is to throw 
+away semantic values and input tokens until a rule containing 
+the special non-terminal \fBerror\fP can be 
+matched. Discarding of tokens is simply performed by 
+overwriting variables and array entries of type 
+\fBYYSTYPE\fP with new values. 
+.PP 
+Unfortunately, this approach leads to a memory leak if 
+\fBYYSTYPE\fP is a pointer type. btyacc allows 
+you to supply functions for cleaning up the semantic and text 
+position values, by \fB#define\fPing the 
+following symbols in the preamble of your grammar file: 
+.PP 
+ 
+.IP "YYDELETEVAL" 10 
+Preprocessor symbol for a function to call 
+before the semantic value of a token or non-terminal 
+is discarded. 
+.IP "YYDELETEPOSN" 10 
+Preprocessor symbol for a function to call 
+before the text position of a token or non-terminal is 
+discarded.        
+.PP 
+Both functions are called with two arguments. The first 
+argument of type \fBYYSTYPE\fP or 
+\fBYYPOSN\fP is the value that will be discarded.  
+The second argument is of type \fBint\fP and is 
+one of three values: 
+ 
+.IP "0" 10 
+discarding input 
+token 
+.IP "1" 10 
+discarding state on 
+stack 
+.IP "2" 10 
+cleaning up stack when 
+aborting        
+ 
+.SS "Detailed syntax error reporting" 
+.PP 
+If you \fB#define\fP the preprocessor 
+variable \fBYYERROR_DETAILED\fP in your grammar 
+file, you must also define the following error processing 
+function: 
+ 
+ 
+.PP 
+.nf 
+.ta 8n 16n 24n 32n 40n 48n 56n 64n 72n 
+.sp 1 
+\fBvoid \fByyerror_detailed\fP\fR( 
+\fBchar* \fBtext\fR\fR, 
+\fBint \fBerrt\fR\fR, 
+\fBYYSTYPE& 
+\fBerrt_value\fR\fR, 
+\fBYYPOSN& \fBerrt_posn\fR\fR); 
+.fi 
+ 
+.IP "text" 10 
+error message 
+.IP "errt" 10 
+code of the token that caused the 
+error 
+.IP "errt_value" 10 
+value of the token that caused the 
+error 
+.IP "errt_posn" 10 
+text position of token that caused 
+error 
+.SS "Preprocessor directives" 
+.PP 
+btyacc supports defining symbols and acting on them with 
+conditional directives inside grammar files, not unlike the C 
+preprocessor. 
+.IP "%define \fINAME\fP" 10 
+Define the preprocessor symbol 
+\fINAME\fP. Equivalent to the 
+command line switch 
+\fB-D\fP\fINAME\fP. 
+ 
+.IP "%ifdef \fINAME\fP" 10 
+If preprocessor variable 
+\fINAME\fP is defined, process the 
+text from this \fB%ifdef\fP to the closing 
+\fB%endif\fP, otherwise skip 
+it. 
+.IP "%endif" 10 
+Closing directive for 
+\fB%ifdef\fP. \fB%ifdef\fPs 
+cannot be nested. 
+.IP "%include \fIFILENAME\fP" 10 
+Process contents of the file named 
+\fIFILENAME\fP. Only one nesting 
+level of \fB%include\fP is 
+allowed. 
+.IP "%ident \fISTRING\fP" 10 
+Insert an `\fB#ident 
+\fP\fISTRING\fP' directive into 
+the output file. \fISTRING\fP must be a 
+string constant enclosed in "". 
+.SS "Inherited attributes" 
+.PP 
+Inherited attributes are undocumented. (See the 
+\fBREADME\fP and the btyacc source code for a 
+little information.) If you work out how they work, contact me 
+at <atterer@debian.org>! 
+.SH "Bugs" 
+.PP 
+The worst-case complexity of parsing is exponential for any 
+grammar which allows backtracking to take place. In other words, 
+a btyacc-generated parser constitutes a denial-of-service bug if 
+used in applications where an attacker is able to supply 
+specially crafted data as input to the parser. (For all 
+"regular" input data, the potentially exponential complexity is 
+not normally an issue.) 
+.PP 
+bison's \fB%expect\fP directive is not 
+supported. 
+.PP 
+There is no \fB%else\fP and 
+\fB%ifndef\fP. \fB%ifdef\fPs and 
+\fB%include\fPs cannot be nested. 
+.SH "Authors" 
+.PP 
+Robert Corbett 
+<robert.corbett@eng.sun.com> / 
+<corbett@berkeley.edu> was one of the 
+original authors of Berkeley byacc. Chris Dodd 
+<chrisd@reservoir.com> had the brilliant 
+idea of adding backtracking capabilities, and is responsible for 
+the initial backtracking changes. Vadim Maslov 
+<vadik@siber.com> further improved the 
+code. 
+.PP 
+This documenation was written by Richard Atterer 
+<atterer@debian.org> for the Debian 
+GNU/Linux distribution, but is donated to the public domain and 
+may thus be used freely for any purpose. 
+.SH "Files" 
+.PP 
+.IP "" 10 
+\fB/usr/doc/btyacc/examples/btyaccpa.ske\fP 	 
+.IP "" 10 
+\fB/usr/doc/btyacc/examples/btyacc-c.ske\fP 	 
+.IP "" 10 
+\fB/usr/doc/btyacc/README\fP 
+.SH "See also" 
+.PP 
+\fBbison\fP\fB(1)\fP (or `info bison'), 
+\fBbyacc\fP\fB(1)\fP, 
+\fByacc\fP\fB(1)\fP, 
+\fBantlr\fP\fB(1)\fP      
+...\" created by instant / docbook-to-man, Thu 05 Jul 2001, 17:48 

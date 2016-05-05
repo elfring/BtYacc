@@ -1,0 +1,32 @@
+btyacc for Debian
+-----------------
+
+A number of small bugfixes have been applied to this Debian version of
+btyacc:
+
+- Using "$<type>0" in a rule no longer causes btyacc to crash or
+  the generated parser to behave incorrectly.
+
+- The generated parser does no longer depend on TRUE being defined.
+
+- Generated files use the suffixes ".tab.h .tab.c .code.c" rather than
+  "_tab.h _tab.c _code.c"
+
+- The default definitions of YYDELETEVAL and YYDELETEPOSN (i.e. the
+  ones used if you don't #define your own) have been changed to take
+  two arguments.
+
+- The default rule action of btyacc was to zero out $$ using memset. 
+  In order to get closer to bison compatibility, the default has been
+  changed to "$$=$1". You can still get the original behaviour with a
+  "#define _YACC_DEFAULT_ACTION_" in your grammar file.
+
+- Temporary files are created in a secure manner, using mkstemp()
+  rather than mktemp().
+
+Furthermore, in /usr/doc/btyacc/examples/btyacc-c.ske a parser
+skeleton is supplied which compiles not only as C++ like upstream's
+btyaccpa.ske, but also as C.
+
+
+Richard Atterer <atterer@debian.org>  Tue,  3 Jul 2001 21:59:14 +0200

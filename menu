@@ -1,0 +1,2 @@
+?package(btyacc):needs=text section=Apps/Programming\
+  title="btyacc" command="/usr/bin/btyacc"

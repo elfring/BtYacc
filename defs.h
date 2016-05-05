@@ -59,9 +59,9 @@ typedef int Yshort;
 
 /* defines for constructing filenames */
 
-#define DEFINES_SUFFIX  "_tab.h"
-#define OUTPUT_SUFFIX   "_tab.c"
-#define CODE_SUFFIX     "_code.c"
+#define DEFINES_SUFFIX  ".tab.h"
+#define OUTPUT_SUFFIX   ".tab.c"
+#define CODE_SUFFIX     ".code.c"
 #define VERBOSE_SUFFIX  ".output"
 
 /* keyword codes */
@@ -391,7 +391,7 @@ void lr0(void);
 
 /* main.c */
 void done(int);
-void onintr(void);
+void onintr(int);
 void set_signals(void);
 void usage(void);
 void getargs(int, char **);
